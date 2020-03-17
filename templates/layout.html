@@ -1,0 +1,132 @@
+<!--INFORMATIONS
+This file is the layout that wraps every other html page. 
+
+Author : Laura Duciel CASC4DE
+-->
+<html>
+  <head>
+<meta charset="utf-8">
+<title> Flask Form for Metadata File Generation</title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<!-- <link href="/static/css/font_OpenSansCondensed700.css" rel="stylesheet"> 
+<link href="/static/css/font_OpenSans.css" rel="stylesheet">   -->  
+<link rel="application/javascript" href="https://code.jquery.com/jquery-1.9.1.min.js">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/page_proc.css">
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="static/js/bootstrap-filestyle.min.js"></script>
+
+<style>
+
+</style>
+<div id="globalWrapper"> <!-- To push footer to page bottom -->
+<!------
+Navbar
+------>
+<div class="navbar-wrapper">
+  <div class="container" style="padding-right: 0px !important; padding-left: 0px !important; margin-right: auto; margin-left: auto; width: auto !important;">
+    <nav class="navbar navbar-inverse navbar-static-top" style="background-color: #0A2B3D;padding-right: 0px !important; padding-left: 0px !important; margin-right: auto; margin-left: auto; width: auto !important; margin-bottom: 0px" >
+        <div class="container" id="nav-container" style="padding-right: 0px !important; padding-left: 0px !important; margin-right: auto; margin-left: auto; width: auto !important;">
+                <div class="col-md-3">
+                    <p style="color:white;font-size: 11px" class="navbar-text">
+                    <a href="http://www.eu-fticr-ms.eu/"><img alt="Bootstrap Image Preview" src="/static/img/eufticr_whitelogo.png" style="width:auto;height:60px"/></a>
+                    </p>
+                </div>
+                <div class="col-md-6" style="text-align: center">
+                    <p style="color:white;font-size: 11px" class="navbar-text">
+                    <a></a>
+                    </p>
+                </div>
+                <div class="col-md-3" style="text-align: right;padding: 20px">
+                  <div class="buttons">
+                    <a class="btn" id="popup_button" role="button" data-toggle="modal" data-target="#myModal"><img class="btn_header" src="/static/img/power-standby.svg" title="Quit the application" />
+                    </a>
+                  </div>
+                </div>
+        </div>
+    </nav>
+    <!-- The Bootstrap Modal (popup) -->
+
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog modal-confirm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="icon-box">
+                        <img src="/static/img/shutdown_red.svg" style="width:75px"/>
+                    </div>              
+                    <p  style="font-size: 40px;" class="modal-title"><strong style=" vertical-align: sub !important;">Are you sure?</strong></p>  
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p  style="font-size: 20px">You are on the point to quit the Metadata form, was it your intention?</p>
+                </div>
+                <div class="modal-footer">
+                    <a type="button" class="btn btn-info" data-dismiss="modal" style="font-size: 20px;color: white">Cancel</a>
+                    <a name="quitbtn" id="quitbtn" href="/quit" class="btn btn-danger" style="font-size: 20px; color: white">Yes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div><!-- /container -->
+</div><!-- /navbar wrapper -->
+
+ <br>
+ <br>
+	
+	<div class="container" style="text-align: justify;width: 1400px;">
+		{% block body %}{% endblock %}
+	</div>
+
+</div><!-- globalWrapper -->
+<br>
+<br>
+<br>
+    <nav class="navbar navbar-inverse navbar-fixed-bottom" style="background-color: #0A2B3D;height:40px">
+    <div class="navbar-footer">
+        <div class="container">
+            
+                <div class="col-md-3">
+                    <p style="color:white;font-size: 11px" class="navbar-text">
+                    <a></a>
+                    </p>
+                </div>
+                <div class="col-md-6" style="text-align: center">
+                    <p style="color:white;font-size: 11px;align-content: center; vertical-align: bottom;padding-top: 7px" class="navbar-text-center">
+                        <strong>Casc4de 2019 | <a href="">Terms and conditions</a>
+                        |<a href="/contact"> Contact us </a></strong><br>
+                        <a href="http://www.casc4de.eu/"><img alt="Bootstrap Image Preview" src="/static/img/casc4de_logo_complete.png" style="width:auto;height:20px"/></a>
+                    </p>
+                </div>
+                <div class="col-md-3" style="text-align: right;padding-top: 15px">
+                    <p style="color:white;font-size: 11px;align-content: right; vertical-align: bottom;" class="navbar-text-center" >
+                        <a href="https://github.com/"><img alt="Bootstrap Image Preview" src="/static/img/bitbucketlogo.png" style="width:auto;height:20px;padding-right: 2px;padding-left: 2px"/></a>
+                        <a href="https://twitter.com/_casc4de_"><img src="/static/img/Twitter_Bird.png" style="width:auto;height:20px;padding-right: 2px;padding-left: 2px"/></a>
+                    </p>
+                </div>
+        </div>
+    </div>
+    </nav>
+<script>
+    $(document).on('click', '.panel-heading span.clickable', function(e){
+        var $this = $(this);
+        if(!$this.hasClass('panel-collapsed')) {
+            $this.parents('.panel').find('.panel-body').slideUp();
+            $this.addClass('panel-collapsed');
+            $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        } else {
+            $this.parents('.panel').find('.panel-body').slideDown();
+            $this.removeClass('panel-collapsed');
+            $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        }
+    })
+</script>
+
+</body>
+<script>
+    $(function(){
+        $('#quitbtn').on('click',function(){window.close();});  // quit button
+    });
+</script>
+</html>

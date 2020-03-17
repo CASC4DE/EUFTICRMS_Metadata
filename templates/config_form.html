@@ -1,0 +1,1380 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="container" style="text-align: justify;padding: 0px">
+    <div style="text-align: center;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
+      <div style="border-top-width:4px;border-top-color:#89c8e2;border-top-style:solid;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
+        <H2><strong>Form for the generation of metadata files.</strong></H2>
+      </div>
+    </div>
+  </div>
+<br>
+<br>
+     
+  <div class="container" style="text-align: justify;padding: 0px;margin-top: 5px">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('import_folder') }}">
+      <div class="form-group">
+        <label>Import configuration from folder (Bruker .d only!):</label>
+        <input class="file blue" type="file" id="BSbtninfo" name="file"  onchange="pressed()" webkitdirectory multiple>
+      </div>
+      <span>
+        <input type="submit" class="btn btn-success" value="Import">
+      </span>
+    </form>
+    <p><strong>Imported folder: {{param.name}}</strong></p>
+  </div>
+
+  <form action="" method="post">
+  <div class="row" style="text-align: justify; padding: 0px;margin: 0px">
+          <br>
+          <div class="form-group">
+            <label class="col-2 col-form-label control-label required" for="EndEmbargo">End of Embargo Date</label>
+            <div>
+              <input class="form-control" type="date" value="2011-08-19" id="EndEmbargo" required>
+              <span class="help-block">Default: 18 months after acquisition date</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="DataPublication">Data Publication?</label>
+            <br>
+            <div class="checkbox-inline">
+              <label for="immediately_public">
+                <input type="checkbox" name="DataPublication" id="immediately_public" value="immediately_public">
+                Immediately Public
+              </label>
+            </div>
+            <div class="checkbox-inline">
+              <label for="public_on_embargo">
+                <input type="checkbox" name="DataPublication" id="public_on_embargo" value="public_on_embargo" checked="checked">
+                Publication on end of embargo date (18 months after acquisition)
+              </label>
+            </div>
+            <div class="checkbox-inline">
+              <label for="private">
+                <input type="checkbox" name="DataPublication" id="private" value="private">
+                Private
+              </label>
+            </div>
+          </div> 
+          <div class="form-group col-md-6" style="text-align: justify;padding: 25px;height: auto">
+          <H3><U><strong>1. Sample</strong></U></H3>
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Global handling and safety considerations</h3>
+              <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label required" for="Name">Name</label>  
+                <div>
+                  <input id="Name" name="Name" type="text" placeholder="Sample Name" class="form-control input-md" required>
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Mass">Mass (g)</label>  
+                <div>
+                  <input id="Mass" name="Mass" type="number" placeholder="10" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Vol">Volume (cm<sup>3</sup>)</label>  
+                <div>
+                  <input id="Vol" name="Vol" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Conc">Concentration (mol.L<sup>-1</sup>)</label>  
+                <div>
+                  <input id="Conc" name="Conc" type="number" placeholder="3" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label required" for="Temp">Conservation Temperature (C°)</label>  
+                <div>
+                  <input id="Temp" name="Temp" type="number" placeholder="5" class="form-control input-md" required>
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Risks_Health">List risks for human health, if any.</label>  
+                <div>
+                  <input id="Risks_Health" name="Risks_Health" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <span class="help-block">List, separated with commas.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Risks_Enviro">List environmental risks, if any.</label>  
+                <div>
+                  <input id="Risks_Enviro" name="Risks_Enviro" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <span class="help-block">List, separated with commas.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Risks_Manip">List risks associated to reception, use or disposal (handling) of the sample, if any.</label>  
+                <div>
+                  <input id="Risks_Manip" name="Risks_Manip" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <span class="help-block">List, separated with commas.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="OutsideWelcLabPrep">Was the sample prepared outside the welcoming laboratory?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="OutsideWelcLabPrep-0">
+                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="OutsideWelcLabPrep-1">
+                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label classe="control-label" for="VirtualAccess">Will the experiment be done with virtual access ?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="VirtualAccess-Y">
+                    <input type="radio" name="VirtualAccess" id="VirtualAccess-Y" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="VirtualAccess-N">
+                    <input type="radio" name="VirtualAccess" id="VirtualAccess-N" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+                <span class="help-block">If yes, please answer the following questions to prepare a sample management procedure.</span>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="InWelcLabManip">Was the sample manipulated at the welcoming laboratory?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="InWelcLabManip-0">
+                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="InWelcLabManip-1">
+                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Storage">Where is the sample stored after experiment?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Storage-0">
+                    <input type="radio" name="Storage" id="Storage-0" value="welcoming_lab">
+                    Within the welcoming laboratory
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Storage-1">
+                    <input type="radio" name="Storage" id="Storage-1" value="invited_lab" checked="checked">
+                    Brought away to the invited laboratory
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <H4><strong><u> Specific considerations according to the type of sample </u></strong></H4>
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Chemical</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" style="display: none;">
+              <span><H4><strong><u> Description </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Formula">Formula</label>  
+                <div>
+                  <input id="Chem_Formula" name="Chem_Formula" type="text" placeholder="CaHbOcNd" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Type">Chemical Type</label>
+                <br>
+                <div class="checkbox-inline">
+                  <label for="Chem_Type-0">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-0" value="Gas">
+                    Gas
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Chem_Type-1">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-1" value="Powder">
+                    Powder
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Chem_Type-2">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-2" value="Liquid">
+                    Liquid
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Chem_Type-3">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-3" value="Film">
+                    Film
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Chem_Type-4">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-4" value="Bulk">
+                    Bulk
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="chem_solv">Chemical Solvent</label>
+                  <select id="chem_solv" name="chem_solv" class="form-control">
+                    <option value="pentane">pentane</option>
+                    <option value="cyclopentane">cyclopentane</option>
+                    <option value="hexane">hexane</option>
+                    <option value="cyclohexane">cyclohexane</option>
+                    <option value="benzene">benzene</option>
+                    <option value="toluene">toluene</option>
+                    <option value="1,4-dioxane">1,4-dioxane</option>
+                    <option value="chloroform">chloroform</option>
+                    <option value="diethyl ether">diethyl ether</option>
+                    <option value="dichloromethane (DCM)">dichloromethane (DCM)</option>
+                    <option value="tetrahydrofuran (THF)">tetrahydrofuran (THF)</option>
+                    <option value="ethyl acetate">ethyl acetate</option>
+                    <option value="acetone">acetone</option>
+                    <option value="dimethylformamide (DMF)">dimethylformamide (DMF)</option>
+                    <option value="acetonitrile (MeCN)">acetonitrile (MeCN)</option>
+                    <option value="dimethyl sulfoxide (DMSO)">dimethyl sulfoxide (DMSO)</option>
+                    <option value="nitromethane">nitromethane</option>
+                    <option value="propylene carbonate">propylene carbonate</option>
+                    <option value="formic acid">formic acid</option>
+                    <option value="n-butanol">n-butanol</option>
+                    <option value="isopropyl alcohol (IPA)">isopropyl alcohol (IPA)</option>
+                    <option value="n-propanol">n-propanol</option>
+                    <option value="ethanol">ethanol</option>
+                    <option value="methanol">methanol</option>
+                    <option value="acetic acid">acetic acid</option>
+                    <option value="water">water</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Addit">Additives</label>  
+                <div>
+                  <input id="Chem_Addit" name="Chem_Addit" type="text" placeholder="additive1, additive2" class="form-control input-md">
+                  <span class="help-block">List of the chemical additives in the sample, separated with commas.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Press">Packaging Pressure (bar)</label>  
+                <div>
+                  <input id="Chem_Press" name="Chem_Press" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <span><H4><strong><u> Safety </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Tox">Toxic?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Tox-0">
+                    <input type="radio" name="Chem_Tox" id="Chem_Tox-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Tox-1">
+                    <input type="radio" name="Chem_Tox" id="Chem_Tox-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Expl">Explosive?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Expl-0">
+                    <input type="radio" name="Chem_Expl" id="Chem_Expl-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Expl-1">
+                    <input type="radio" name="Chem_Expl" id="Chem_Expl-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Infla">Inflammable?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Infla-0">
+                    <input type="radio" name="Chem_Infla" id="Chem_Infla-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Infla-1">
+                    <input type="radio" name="Chem_Infla" id="Chem_Infla-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Carcino">Carcinogenic?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Carcino-0">
+                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Carcino-1">
+                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Harm">Harmful (noxious)?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Harm-0">
+                    <input type="radio" name="Chem_Harm" id="Chem_Harm-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Harm-1">
+                    <input type="radio" name="Chem_Harm" id="Chem_Harm-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Irrit">Irritant?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Irrit-0">
+                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Irrit-1">
+                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Pol">Polluant?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Pol-0">
+                    <input type="radio" name="Chem_Pol" id="Chem_Pol-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Pol-1">
+                    <input type="radio" name="Chem_Pol" id="Chem_Pol-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_Corros">Corrosive?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Chem_Corros-0">
+                    <input type="radio" name="Chem_Corros" id="Chem_Corros-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Chem_Corros-1">
+                    <input type="radio" name="Chem_Corros" id="Chem_Corros-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chem_SafetySpec_URL">URL to safety specifications for the sample</label>  
+                <div>
+                  <input id="Chem_SafetySpec_URL" name="Chem_SafetySpec_URL" type="text" placeholder="http://url.com" class="form-control input-md">
+                  <span class="help-block">Separate each URL with comma.</span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Biochemical</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" style="display: none;">
+              <span><H4><strong><u> Description </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Bio_Acro">Acronym</label>  
+                <div>
+                  <input id="Bio_Acro" name="Bio_Acro" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_Orig">Sample(s) Origin</label>  
+                <div>
+                  <input id="Bio_Orig" name="Bio_Orig" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Biochem_Type">Biochemical Type</label>
+                <br>
+                <div class="checkbox-inline">
+                  <label for="Biochem_Type-1">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-1" value="Powder">
+                    Powder
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Biochem_Type-2">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-2" value="Solution">
+                    Solution
+                  </label>
+                </div>
+                <div class="checkbox-inline">
+                  <label for="Biochem_Type-4">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-4" value="Bulk">
+                    Bulk
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_WelLab_Country">Is the sample from the welcoming laboratory country?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Bio_WelLab_Country-0">
+                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Bio_WelLab_Country-1">
+                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_SampNum">Number of sample(s)</label>  
+                <div>
+                  <input id="Bio_SampNum" name="Bio_SampNum" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <span><H4><strong><u> Safety </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Bio_SampRiskGrp">Sample group of risk (*)</label>  
+                <div>
+                  <input id="Bio_SampRiskGrp" name="Bio_SampRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block">From 1 to 4.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_HostRiskGrp">Host group of risk (*)</label>  
+                <div>
+                  <input id="Bio_HostRiskGrp" name="Bio_HostRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block">From 1 to 4.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_RecombSamp">Is the sample recombinant?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Bio_RecombSamp-0">
+                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Bio_RecombSamp-1">
+                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_ActiveVirus">Is the sample an active virus?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Bio_ActiveVirus-0">
+                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Bio_ActiveVirus-1">
+                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_VirulFactor">Does the sample present a virulence factor?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Bio_VirulFactor-0">
+                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Bio_VirulFactor-1">
+                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Bio_Prion">Is the sample a prion protein?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Bio_Prion-0">
+                    <input type="radio" name="Bio_Prion" id="Bio_Prion-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Bio_Prion-1">
+                    <input type="radio" name="Bio_Prion" id="Bio_Prion-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Cellular</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" style="display: none;">
+              <span><H4><strong><u> Description </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Cell_SampActivity">Is the sample</label>
+                  <label class="radio-inline" for="Cell_SampActivity-0">
+                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-0" value="Active" checked="checked">
+                    Active
+                  </label> 
+                  <label class="radio-inline" for="Cell_SampActivity-1">
+                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-1" value="Dead">
+                    Dead
+                  </label>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_CellTissueSamp">Is the sample</label>
+                  <label class="radio-inline" for="Cell_CellTissueSamp-0">
+                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-0" value="Cellular" checked="checked">
+                    Cellular
+                  </label> 
+                  <label class="radio-inline" for="Cell_CellTissueSamp-1">
+                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-1" value="Tissue">
+                    Tissue
+                  </label>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_SampType">Sample Type</label>
+                  <label class="checkbox-inline" for="Cell_SampType-0">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-0" value="Human">
+                    Human
+                  </label>
+                  <label class="checkbox-inline" for="Cell_SampType-1">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-1" value="Animal">
+                    Animal
+                  </label>
+                  <label class="checkbox-inline" for="Cell_SampType-2">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-2" value="Bacterial">
+                    Bacterial
+                  </label>
+                  <label class="checkbox-inline" for="Cell_SampType-3">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-3" value="Vegetal">
+                    Vegetal
+                  </label>
+                  <label class="checkbox-inline" for="Cell_SampType-4">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-4" value="Yeast">
+                    Yeast
+                  </label>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_CellOrigSamp">Does the sample originate from</label>
+                  <label class="checkbox-inline" for="Cell_CellOrigSamp-0">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-0" value="Primary line">
+                    Primary line
+                  </label>
+                  <label class="checkbox-inline" for="Cell_CellOrigSamp-1">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-1" value="Cell immortalized tumor line">
+                    Cell immortalized tumor line
+                  </label>
+                  <label class="checkbox-inline" for="Cell_CellOrigSamp-2">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-2" value="Stem cell">
+                    Stem cell
+                  </label>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_GMO">Is the sample a Genetically Modified Organism (GMO)?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Cell_GMO-0">
+                    <input type="radio" name="Cell_GMO" id="Cell_GMO-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Cell_GMO-1">
+                    <input type="radio" name="Cell_GMO" id="Cell_GMO-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_Strain">For bacterial or viral origin specify strain</label>  
+                <div>
+                  <input id="Cell_Strain" name="Cell_Strain" type="text" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_WelLab_Country">Is the sample from the welcoming laboratory country?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Cell_WelLab_Country-0">
+                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Cell_WelLab_Country-1">
+                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_SampNum">Number of sample(s)</label>  
+                <div>
+                  <input id="Cell_SampNum" name="Cell_SampNum" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <span><H4><strong><u> Safety </u></strong></H4></span>
+              <div class="form-group">
+                <label class="control-label" for="Cell_SampRiskGrp">Sample group of risk (*)</label>  
+                <div>
+                  <input id="Cell_SampRiskGrp" name="Cell_SampRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block">From 1 to 4.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_VirulFactor">Does the sample present a virulence factor?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Cell_VirulFactor-0">
+                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Cell_VirulFactor-1">
+                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Cell_Prion">Is the sample a prion protein?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="Cell_Prion-0">
+                    <input type="radio" name="Cell_Prion" id="Cell_Prion-0" value="True">
+                    Yes
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="Cell_Prion-1">
+                    <input type="radio" name="Cell_Prion" id="Cell_Prion-1" value="False" checked="checked">
+                    No
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+      <div class="form-group col-md-6" style="text-align: justify;padding: 25px">
+          <H3><U><strong>2. Global Set-Up</strong></U></H3>
+          <div class="form-group">
+            <label class="control-label required" for="SetUpMethod">Set-up?</label>
+            <br>
+            <div class="radio-inline">
+              <label for="DirectInjection">
+                <input type="radio" name="SetUpMethod" id="DirectInjection" value="DirectInjection" required>
+                Direct Injection
+              </label>
+            </div>
+            <div class="radio-inline">
+              <label for="Chromatography">
+                <input type="radio" name="SetUpMethod" id="Chromatography" value="Chromatography" required>
+                Chromatography (LC/GC)
+              </label>
+            </div>
+            <div class="radio-inline">
+              <label for="Imaging">
+                <input type="radio" name="SetUpMethod" id="Imaging" value="Imaging" required>
+                Imaging
+              </label>
+            </div>
+            <div class="radio-inline">
+              <label for="CLIO">
+                <input type="radio" name="SetUpMethod" id="CLIO" value="CLIO" required>
+                CLIO Laser
+              </label>
+            </div>
+            <div class="radio-inline">
+              <label for="2DMS">
+                <input type="radio" name="SetUpMethod" id="2DMS" value="2DMS" required>
+                2D-MS
+              </label>
+            </div>
+          </div> 
+          <div class="panel panel-info" id="DirectInjectionPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Direct Injection</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label" for="DI_Solvent">Solvent</label>  
+                <div>
+                  <input id="DI_Solvent" name="DI_Solvent" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info" id="ChromatographyPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Chromatography (LC/GC)</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label" for="ChromatoSys_Ref">Chromatographic system reference</label>  
+                <div>
+                  <input id="ChromatoSys_Ref" name="ChromatoSys_Ref" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Column_Construct">Constructor name for separation column</label>  
+                <div>
+                  <input id="Column_Construct" name="Column_Construct" type="text" placeholder="constructorA" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Column_Ref">Separation column reference</label>  
+                <div>
+                  <input id="Column_Ref" name="Column_Ref" type="text" placeholder="RefB" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chromato_Solvents">Solvents</label>  
+                <div>
+                  <input id="Chromato_Solvents" name="Chromato_Solvents" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block">Separated by commas.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Chromato_Method_Filename">Filename/Path of the chromatographic method</label>  
+                <div>
+                  <input id="Chromato_Method_Filename" name="Chromato_Method_Filename" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info" id="ImagingPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Imaging</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label" for="Lateral_Resol">Lateral Resolution</label>  
+                <div>
+                  <input id="Lateral_Resol" name="Lateral_Resol" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Spot_Size">Spot laser size</label>  
+                <div>
+                  <input id="Spot_Size" name="Spot_Size" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="Spots_Dist">Spots distance</label>  
+                <div>
+                  <input id="Spots_Dist" name="Spots_Dist" type="number" placeholder="1" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info" id="CLIOPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">CLIO Laser</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label" for="Wavelength_Func">&lambda; = f(t)</label>  
+                <div>
+                  <input id="Wavelength_Func" name="Wavelength_Func" type="text" placeholder="a+bt" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="CLIO_calib_file">CLIO Calibration Filename</label>  
+                <div>
+                  <input id="CLIO_calib_file" name="CLIO_calib_file" type="text" placeholder="/path/to/myfile.ext" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-info" id="2DMSPanel">
+            <div class="panel-heading">
+              <h3 class="panel-title">2D-MS</h3>
+              <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label" for="2D_Method">Method used</label>  
+                <div>
+                  <input id="2D_Method" name="2D_Method" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="2D_Exc_Pulses">Frequency range of the excitation pulses (Hz)</label>  
+                <div>
+                  <input id="2D_Exc_Pulses" name="2D_Exc_Pulses" type="text" placeholder="460655, 263228" class="form-control input-md">
+                  <span class="help-block">Separate beginning and end with comma.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="2D_Nf_meas">Nyquist Frequency Nf used for measurements (Hz)</label>  
+                <div>
+                  <input id="2D_Nf_meas" name="2D_Nf_meas" type="number" placeholder="500000" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="2D_Obs_Pulse">Frequency range of the observed pulse (Hz)</label>  
+                <div>
+                  <input id="2D_Obs_Pulse" name="2D_Obs_Pulse" type="text" placeholder="1250095, 61418" class="form-control input-md">
+                  <span class="help-block">Separate beginning and end with comma.</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="2D_NUS_Delay_file">NUS Delay list filename</label>  
+                <div>
+                  <input id="2D_NUS_Delay_file" name="2D_NUS_Delay_file" type="text" placeholder="" class="form-control input-md">
+                  <span class="help-block"></span>  
+                </div>
+              </div>
+            </div>
+          </div>
+          <H3><U><strong>3. Experimental</strong></U></H3>
+          <p><i>Import a Bruker Folder (top of the page) to autofill some field in this part.</i></p>
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title">Spectrometer</h3>
+              <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+            </div>
+            <div class="panel-body" style="display: block;">
+              <div class="form-group">
+                <label class="control-label required" for="spectrometer_type">Spectrometer Type?</label>
+                <div>
+                  <div class="radio-inline">
+                    <label for="spectrometer_type-0">
+                    <input type="radio" name="spectrometer_type" id="spectrometer_type-0" required value="Solarix" {% if "Solarix"==param.SpectrometerType %} checked="checked"{% endif %}>
+                    Solarix
+                    </label>
+                  </div>
+                  <div class="radio-inline">
+                    <label for="spectrometer_type-1">
+                    <input type="radio" name="spectrometer_type" id="spectrometer_type-1" required value="Apex" {% if "Apex"==param.SpectrometerType %} checked="checked"{% endif %}>
+                    Apex
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label required" for="Spectro_Source">Source?</label>
+                <div>
+                  <div class="radio">
+                    <label for="Spectro_Source-1">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1" value="ESI" required>
+                    ESI
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label for="Spectro_Source-1bis">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1bis" value="NanoESI" required>
+                    NanoESI
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label for="Spectro_Source-2">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-2" value="MALDI" required>
+                    MALDI
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label for="Spectro_Source-3">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-3" value="APCI" required>
+                    APCI
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label for="Spectro_Source-4">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-4" value="APLI" required>
+                    APLI
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label for="Spectro_Source-5">
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-5" value="APPI" required>
+                    APPI
+                    </label>
+                  </div>
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div id="ESI-container">
+                <div class="form-group">
+                <label class="control-label" for="ESIFlow">Flow?</label>  
+                  <div>
+                    <input id="ESIFlow" name="ESIFlow" type="number" placeholder="" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="ESISprayShield">SprayShield?</label>  
+                  <div>
+                    <input id="ESISprayShield" name="ESISprayShield" type="number" placeholder="" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="ESINeedleVoltage">Needle Voltage?</label>  
+                    <div>
+                      <input id="ESINeedleVoltage" name="ESINeedleVoltage" type="number" placeholder="" class="form-control input-md">
+                      <span class="help-block"></span>  
+                    </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="ESICapillaryEntrance">Capillary Entrance?</label>  
+                    <div>
+                      <input id="ESICapillaryEntrance" name="ESICapillaryEntrance" type="number" placeholder="" class="form-control input-md">
+                      <span class="help-block"></span>  
+                    </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label" for="ESICapillaryExit">Capillary Exit?</label>  
+                    <div>
+                      <input id="ESICapillaryExit" name="ESICapillaryExit" type="number" placeholder="" class="form-control input-md">
+                      <span class="help-block"></span>  
+                    </div>
+                </div>
+              </div>
+              <div id="MALDI-container">
+                <div class="form-group">
+                <label class="control-label" for="MALDIMatrix">Matrix?</label>  
+                  <div>
+                    <input id="MALDIMatrix" name="MALDIMatrix" type="text" placeholder="" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="MALDILaserShots">Laser shots per scan?</label>
+                  <div>
+                    <input id="MALDILaserShots" name="MALDILaserShots" type="number" placeholder="" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="MALDIWavelength">Laser &lambda;? (nm)</label>
+                  <div>
+                    <input id="MALDIWavelength" name="MALDIWavelength" type="number" value="337" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+              </div>
+              <div id="APCI-container">
+                <div class="form-group">
+                  <label class="control-label" for="APCINeedleVoltage">Needle Voltage?</label>  
+                    <div>
+                      <input id="APCINeedleVoltage" name="APCINeedleVoltage" type="number" placeholder="" class="form-control input-md">
+                      <span class="help-block"></span>  
+                    </div>
+                </div>
+              </div>
+              <div id="APLI-container">
+                <div class="form-group">
+                <label class="control-label" for="APLILaserShots">Laser shots per scan?</label>
+                  <div>
+                    <input id="APLILaserShots" name="APLILaserShots" type="number" placeholder="" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="APLIWavelength">Laser &lambda;? (nm)</label>
+                  <div>
+                    <input id="APLIWavelength" name="APLIWavelength" type="number" value="337" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+              </div>
+              <div id="APPI-container">
+                <div class="form-group">
+                <label class="control-label" for="APPILamp">Lamp?</label>
+                  <div>
+                    <input id="APPILamp" name="APPILamp" type="text" placeholder="N2 Lamp" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="APPIWavelength">Laser &lambda;? (nm)</label>
+                  <div>
+                    <input id="APPIWavelength" name="APPIWavelength" type="number" value="337" class="form-control input-md">
+                    <span class="help-block"></span>  
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label required" for="B0">B0</label>  
+                  <div>
+                    <input id="B0" name="B0" type="number" placeholder="" class="form-control input-md" value={{param.B0}} required>
+                    <span class="help-block">Magnetic Field Value (automatically calculated with ML3 if .d imported).</span>  
+                  </div>
+              </div>
+            </div>
+          </div>
+              <div class="panel panel-info">
+              <div class="panel-heading">
+                <h3 class="panel-title">Acquisition</h3>
+                <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+              </div>
+              <div class="panel-body" style="display: none;">
+                <div class="form-group">
+                  <label for="AcqDate" class="col-2 col-form-label">Acquisition Date</label>
+                  <div>
+                    <input class="form-control" type="date" value="2011-08-19" id="AcqDate">
+                  </div>
+                </div>
+                <div class="form-group">
+                <label class="control-label" for="EXC_hi">EXC_hi</label>  
+                <div>
+                  <input id="EXC_hi" name="EXC_hi" type="number" placeholder="" class="form-control input-md" value={{param.EXC_hi}}>
+                  <span class="help-block">There will be help here!</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="EXC_low">EXC_low</label>  
+                <div>
+                  <input id="EXC_low" name="EXC_low" type="number" placeholder="" class="form-control input-md" value={{param.EXC_low}}>
+                  <span class="help-block">There will be help here!</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="SW_h">SW_h</label>  
+                <div>
+                  <input id="SW_h" name="SW_h" type="number" placeholder="" class="form-control input-md" value={{param.SW_h}}>
+                  <span class="help-block">Spectral Width (Hz)</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="TD">TD</label>  
+                <div>
+                  <input id="TD" name="TD" type="number" placeholder="" class="form-control input-md" value={{param.TD}}>
+                  <span class="help-block">Data Size</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="ML1">ML1</label>  
+                <div>
+                  <input id="ML1" name="ML1" type="number" placeholder="" class="form-control input-md" value={{param.ML1}}>
+                  <span class="help-block">1st Calibration Parameter</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="ML2">ML2</label>  
+                <div>
+                  <input id="ML2" name="ML2" type="number" placeholder="" class="form-control input-md" value={{param.ML2}}>
+                  <span class="help-block">2nd Calibration Parameter</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="ML3">ML3</label>  
+                <div>
+                  <input id="ML3" name="ML3" type="number" placeholder="" class="form-control input-md" value={{param.ML3}}>
+                  <span class="help-block">3d Calibration Parameter (Optional: if 0, 2 parameters mode)</span>  
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="control-label" for="PULPROG">PULPROG</label>  
+                <div>
+                  <input id="PULPROG" name="PULPROG" type="text" placeholder="" class="form-control input-md" value={{param.PULPROG}}>
+                  <span class="help-block">Name of Pulse Sequence</span>  
+                </div>
+              </div>      
+              <div class="form-group">
+                <label class="control-label" for="NB_Step">NB_Step</label>  
+                <div>
+                  <input id="NB_Step" name="NB_Step" type="number" placeholder="" class="form-control input-md" value={{param.NBStep}}>
+                  <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
+                </div>
+              </div>  
+              <div class="form-group">
+                <label class="control-label" for="1stExciteSweep">1st ExciteSweep</label>  
+                <div>
+                  <input id="1stExciteSweep" name="1stExciteSweep" type="number" placeholder="" class="form-control input-md" value={{param.ExciteSweep1st}}>
+                  <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
+                </div>
+              </div> 
+              <div class="form-group">
+                <label class="control-label" for="LastExciteSweep">Last ExciteSweep</label>  
+                <div>
+                  <input id="LastExciteSweep" name="LastExciteSweep" type="number" placeholder="" class="form-control input-md" value={{param.ExciteSweepLast}}>
+                  <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
+                </div>
+              </div> 
+              </div>
+            </div>   
+          <H3><U><strong>4. Raw Data Preprocessing</strong></U></H3>
+          <div class="form-group">
+            <label for="RawPreprocess">Enter here information about any raw data preprocessing which took place.</label>
+            <textarea class="form-control" id="RawPreprocess" rows="3"></textarea>
+            <span class="help-block">Please, be as precise as possible.</span>  
+          </div>
+          <H3><U><strong>5. Additional Comments</strong></U></H3>
+          <div class="form-group">
+            <label for="Comment">Comment</label>
+            <textarea class="form-control" id="Comment" rows="3"></textarea>
+            <span class="help-block">Feel free to insert here any additional comment you want to be present within the metadata file.</span>  
+          </div>
+        </div>
+  </div>
+    <div class="row" style="text-align: justify">
+        <div class="form-group" style="text-align: center;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
+          <button name="submit" type="submit" class="btn btn-success">Generate the configuration file</button>
+          <p><a></a></p>
+          <br>
+        </div>
+    </div>
+  </form>
+</div>
+<script src="/static/js/FormRepo.js"></script>
+<script>
+  var $form = $('#input')
+    , $output = $('#output')
+    , repo = new FormRepo('restclient')
+    ;
+
+  // get the last submitted values back
+  repo.restore($form/*, $form.attr('id')*/ ); // don't necessarily need an identifier
+
+  $form.submit(function (e) {
+    // preserve the last submitted values
+    repo.preserve($form/*, $form.attr('id')*/ ); // don't necessarily need an identifier
+  });
+  
+  console.log( repo.all() );
+</script>
+<script>
+    $('#BSbtndanger').filestyle({
+    buttonName : 'btn-danger',
+    buttonText : ' File selection'
+    });
+    $('#BSbtnsuccess').filestyle({
+    buttonName : 'btn-success',
+    buttonText : ' Open'
+    });
+    $('#BSbtninfo').filestyle({
+    buttonName : 'btn-info',
+    buttonText : ' Select a Folder'
+    });
+    window.pressed = function(){
+    var a = document.getElementById('filepicker');
+    if(a.value == "")
+    {
+        fileLabel.innerHTML = "No file chosen";
+    }
+    else
+    {
+        var theSplit = "Files were picked, please confirm the import:";
+        fileLabel.innerHTML = theSplit;
+    }
+    };
+    $(document).ready(function () {
+    $("#ESI-container").hide();
+    $("#MALDI-container").hide(); 
+    $("#APPI-container").hide();
+    $("#APCI-container").hide();
+    $("#APLI-container").hide();
+    $("#Spectro_Source-1").click(function () {
+        $("#ESI-container").show();
+        $("#MALDI-container").hide(); 
+        $("#APPI-container").hide();
+        $("#APCI-container").hide();
+        $("#APLI-container").hide();
+    });
+    $("#Spectro_Source-1bis").click(function () {
+        $("#ESI-container").show();
+        $("#MALDI-container").hide(); 
+        $("#APPI-container").hide();
+        $("#APCI-container").hide();
+        $("#APLI-container").hide();
+    });
+    $("#Spectro_Source-2").click(function () {
+        $("#ESI-container").hide();
+        $("#MALDI-container").show(); 
+        $("#APPI-container").hide();
+        $("#APCI-container").hide();
+        $("#APLI-container").hide();
+    });
+    $("#Spectro_Source-3").click(function () {
+        $("#ESI-container").hide();
+        $("#MALDI-container").hide(); 
+        $("#APPI-container").hide();
+        $("#APCI-container").show();
+        $("#APLI-container").hide();
+    });
+    $("#Spectro_Source-4").click(function () {
+        $("#ESI-container").hide();
+        $("#MALDI-container").hide(); 
+        $("#APPI-container").hide();
+        $("#APCI-container").hide();
+        $("#APLI-container").show();
+    });
+    $("#Spectro_Source-5").click(function () {
+        $("#ESI-container").hide();
+        $("#MALDI-container").hide(); 
+        $("#APPI-container").show();
+        $("#APCI-container").hide();
+        $("#APLI-container").hide();
+    });
+    });
+    $(document).ready(function () {
+    $("#DirectInjectionPanel").hide();
+    $("#ChromatographyPanel").hide(); 
+    $("#ImagingPanel").hide();
+    $("#CLIOPanel").hide();
+    $("#2DMSPanel").hide();
+    $("#DirectInjection").click(function () {
+        $("#DirectInjectionPanel").show();
+        $("#ChromatographyPanel").hide(); 
+        $("#ImagingPanel").hide();
+        $("#CLIOPanel").hide();
+        $("#2DMSPanel").hide();
+    });
+    $("#Chromatography").click(function () {
+        $("#DirectInjectionPanel").hide();
+        $("#ChromatographyPanel").show(); 
+        $("#ImagingPanel").hide();
+        $("#CLIOPanel").hide();
+        $("#2DMSPanel").hide();
+    });
+    $("#Imaging").click(function () {
+        $("#DirectInjectionPanel").hide();
+        $("#ChromatographyPanel").hide(); 
+        $("#ImagingPanel").show();
+        $("#CLIOPanel").hide();
+        $("#2DMSPanel").hide();
+    });
+    $("#CLIO").click(function () {
+        $("#DirectInjectionPanel").hide();
+        $("#ChromatographyPanel").hide(); 
+        $("#ImagingPanel").hide();
+        $("#CLIOPanel").show();
+        $("#2DMSPanel").hide();
+    });
+    $("#2DMS").click(function () {
+        $("#DirectInjectionPanel").hide();
+        $("#ChromatographyPanel").hide(); 
+        $("#ImagingPanel").hide();
+        $("#CLIOPanel").hide();
+        $("#2DMSPanel").show();
+    });
+    });
+</script>
+{% endblock %}
