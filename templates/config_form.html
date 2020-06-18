@@ -1,10 +1,80 @@
 {% extends "layout.html" %}
 {% block body %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <div class="container" style="text-align: justify;padding: 0px">
     <div style="text-align: center;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
       <div style="border-top-width:4px;border-top-color:#89c8e2;border-top-style:solid;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
         <H2><strong>Form for the generation of metadata files.</strong></H2>
       </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+          <h3 class="panel-title"><strong>Detailed Documentation</strong></h3>
+          <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
+        </div>
+        <div class="panel-body" style="display: none;">
+          <div id="markdown">
+<textarea id="text" style="visibility: hidden;">
+# How to use this metadata generation form?
+*by CASC4DE for EU-FTICR-MS  - Version 1.0.0*
+
+- Import a project folder containing a Bruker .d folder and optionnally a .meta file previously generated. For more information about the structure of a project folder please see this template: 
+
+<p align="center">
+  <img src="/static/img/ProjectFolderStructure.png">
+</p>
+
+- Select the experiment for which you want to create or edit the metadata file and validate it with a click on "Select experiment". The name of the chosen experiment will be displayed.
+- If a .meta file is present, its content will be used to fill out the form and you will only need to change the necessary fields before the generation of an edited version.
+- Else, you need to fill all the mandatory fields and as much as possible of the other fields - the "Experimental" > "Acquistion" part is autofilled with the information present in the imported .d folder.
+- When you think that you provided all necessary information about your dataset you can go down to bottom of the form and click on "Download my .meta file".
+- Then put this file within your project folder and upload it to your EU-FTICR-MS seafile account.
+
+# Description of the different sections content
+This form is made of multiple section, each containing specific information. 
+Note that not all fields are relevant for all situations. 
+In most cases, the needed fields will open on selection of specific options. 
+Many fields are optionnal but keep in memory that the most fields are filled, the highest is the quality of the metadata generated as it describes at best your dataset and samples.
+
+## Import zone
+This is the dedicated place to choose and import your project folder following the given template structure above.
+Briefly, a "project folder" should contain at least a .d folder from Bruker and for metadata edition a .meta file.
+
+## Sample
+This is a tab grouping all information about the sample used for the project. 
+The section is divided in two sub-sections: first, the global handling and safety considerations and then the specific considerations to take into account depending on the sample type (chemical, biochemical, etc.)
+
+### Global handling and safety considerations
+Here you will be asked all the needed information to handle your sample as its name, its conservation specificities, how it was prepared, its mass or concentration. 
+You will also be asked the risks associated to the sample both for human health and environment.
+
+### Specific considerations according to the type of sample
+This part is divided in multiple sub-parts, you only need to give information for the relevant one according your sample type. 
+These are specific questions to describe at best the sample and allow safety conditions work.
+
+## Global Set-Up
+This section is dedicated to the description of your experimental global set-up. First you need to choose the option corresponding to your experiment (Direct Injection, LC/GC, Imaging, etc.), then a specific tab will appear with required parameters associated to the selected type of experiment.
+
+## Experimental
+Here are required more specific information about the experimental set-up. You should indicate if you used a Solarix or Apex Spectrometer and the source. 
+Additional parameters are asked according to the chosen source. 
+Finally the magnetic field is asked but automatically filled with the information present in the imported folder.
+A sub-section entitled "Acquistion" is also present but completely pre-filled with the information gathered within the .d folder.
+
+## Raw Data Preprocessing
+In this free text part you are asked to enter all information regarding the eventual preprocessing you would have applied to your raw data. 
+If you give information here please be very precise so that anyone could understand, reproduce and reuse the dataset. 
+
+## Additional comments
+This section is completely optionnal and you are able to add here any comment or information you find relevant to your data and which would not have been asked in the previous sections. 
+Here again, be as precise as possible. 
+Keep in mind that these information are not only notes for your usage but this will be of importance to make your data F.A.I.R.
+
+
+*If you have any further questions and cannot find the answer in this documentation, please do not hesitate to contact us.*
+</textarea>
+          </div>
+        </div>
     </div>
   </div>
 <br>
@@ -13,14 +83,31 @@
   <div class="container" style="text-align: justify;padding: 0px;margin-top: 5px">
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('import_folder') }}">
       <div class="form-group">
-        <label>Import configuration from folder (Bruker .d only!):</label>
+        <label>Import here a project folder (containing at least a .d folder, eventually a .meta file) to create a new metadata file or edit it if one is already present:</label>
         <input class="file blue" type="file" id="BSbtninfo" name="file"  onchange="pressed()" webkitdirectory multiple>
       </div>
       <span>
         <input type="submit" class="btn btn-success" value="Import">
       </span>
     </form>
-    <p><strong>Imported folder: {{param.name}}</strong></p>
+    <p style="color: darkred"><strong>Imported folder: {% if param.fold_name %} {{param.fold_name}} {% endif %}</strong></p>
+  </div>
+
+<div class="container" style="text-align: justify;padding: 0px;margin-top: 5px">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('select_experiment') }}">
+      <div class="form-group">
+        <label>Select here the experiment from the imported project folder for which you want to create a new metadata file or edit it:</label>
+        <select id="ExpList" name="ExpList" class="form-control">
+          {% for index,expname in ExpList %}
+            <option value={{index}}>{{expname}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <span>
+        <input type="submit" class="btn btn-success" value="Select experiment">
+      </span>
+    </form>
+    <p style="color: darkred"><strong>Chosen experiment: {% if param.ExpName %} {{param.ExpName}} {% else %} No experiment selected. {% endif %}</strong></p>
   </div>
 
   <form action="" method="post">
@@ -29,7 +116,7 @@
           <div class="form-group">
             <label class="col-2 col-form-label control-label required" for="EndEmbargo">End of Embargo Date</label>
             <div>
-              <input class="form-control" type="date" value="2011-08-19" id="EndEmbargo" required>
+              <input class="form-control" type="text" placeholder="DD-MM-YYYY" {% if param.EndEmbargo %} value={{param.EndEmbargo}} {% endif %} id="EndEmbargo" required>
               <span class="help-block">Default: 18 months after acquisition date</span>
             </div>
           </div>
@@ -38,19 +125,19 @@
             <br>
             <div class="checkbox-inline">
               <label for="immediately_public">
-                <input type="checkbox" name="DataPublication" id="immediately_public" value="immediately_public">
+                <input type="checkbox" name="DataPublication" id="immediately_public" value="immediately_public" {% if "immediately_public"==param.DataPublication %} checked="checked"{% endif %}>
                 Immediately Public
               </label>
             </div>
             <div class="checkbox-inline">
               <label for="public_on_embargo">
-                <input type="checkbox" name="DataPublication" id="public_on_embargo" value="public_on_embargo" checked="checked">
+                <input type="checkbox" name="DataPublication" id="public_on_embargo" value="public_on_embargo" {% if "public_on_embargo"==param.DataPublication %} checked="checked"{% endif %}>
                 Publication on end of embargo date (18 months after acquisition)
               </label>
             </div>
             <div class="checkbox-inline">
               <label for="private">
-                <input type="checkbox" name="DataPublication" id="private" value="private">
+                <input type="checkbox" name="DataPublication" id="private" value="private" {% if "private"==param.DataPublication %} checked="checked"{% endif %}>
                 Private
               </label>
             </div>
@@ -64,58 +151,58 @@
             </div>
             <div class="panel-body" style="display: block;">
               <div class="form-group">
-                <label class="control-label required" for="Name">Name</label>  
+                <label class="control-label required" for="FileName">Name</label>  
                 <div>
-                  <input id="Name" name="Name" type="text" placeholder="Sample Name" class="form-control input-md" required>
+                  <input id="FileName" name="FileName" type="text" placeholder="Sample Name or File Name" class="form-control input-md" {% if param.FileName %} value={{param.FileName}} {% endif %} required>
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Mass">Mass (g)</label>  
                 <div>
-                  <input id="Mass" name="Mass" type="number" placeholder="10" class="form-control input-md">
-                  <span class="help-block"></span>  
+                  <input id="Mass" name="Mass" type="number" step=any {% if param.Mass %} value={{param.Mass}} {% endif %} class="form-control input-md">
+                  <span class="help-block">NB: You do not need to fill all fields concerning mass,volume and concentration - just fill those which are relevant to your case.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Vol">Volume (cm<sup>3</sup>)</label>  
                 <div>
-                  <input id="Vol" name="Vol" type="number" placeholder="1" class="form-control input-md">
-                  <span class="help-block"></span>  
+                  <input id="Vol" name="Vol" type="number" step=any {% if param.Vol %} value={{param.Vol}} {% endif %} class="form-control input-md">
+                  <span class="help-block">NB: You do not need to fill all fields concerning mass,volume and concentration - just fill those which are relevant to your case.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Conc">Concentration (mol.L<sup>-1</sup>)</label>  
                 <div>
-                  <input id="Conc" name="Conc" type="number" placeholder="3" class="form-control input-md">
-                  <span class="help-block"></span>  
+                  <input id="Conc" name="Conc" type="number" step=any {% if param.Conc %} value={{param.Conc}} {% endif %} class="form-control input-md">
+                  <span class="help-block">NB: You do not need to fill all fields concerning mass,volume and concentration - just fill those which are relevant to your case.</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label required" for="Temp">Conservation Temperature (C°)</label>  
+                <label class="control-label required" for="Temp" >Conservation Temperature (C°)</label>  
                 <div>
-                  <input id="Temp" name="Temp" type="number" placeholder="5" class="form-control input-md" required>
+                  <input id="Temp" name="Temp" type="number" step=any {% if param.Temp %} value={{param.Temp}} {% endif %} class="form-control input-md" required>
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Risks_Health">List risks for human health, if any.</label>  
                 <div>
-                  <input id="Risks_Health" name="Risks_Health" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <input id="Risks_Health" name="Risks_Health" type="text" placeholder="risk1, risk2" {% if param.Risks_Health %} value={{param.Risks_Health}} {% endif %} class="form-control input-md">
                   <span class="help-block">List, separated with commas.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Risks_Enviro">List environmental risks, if any.</label>  
                 <div>
-                  <input id="Risks_Enviro" name="Risks_Enviro" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <input id="Risks_Enviro" name="Risks_Enviro" type="text" placeholder="risk1, risk2" {% if param.Risks_Enviro %} value={{param.Risks_Enviro}} {% endif %} class="form-control input-md">
                   <span class="help-block">List, separated with commas.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Risks_Manip">List risks associated to reception, use or disposal (handling) of the sample, if any.</label>  
                 <div>
-                  <input id="Risks_Manip" name="Risks_Manip" type="text" placeholder="risk1, risk2" class="form-control input-md">
+                  <input id="Risks_Manip" name="Risks_Manip" type="text" placeholder="risk1, risk2" {% if param.Risks_Manip %} value={{param.Risks_Manip}} {% endif %} class="form-control input-md">
                   <span class="help-block">List, separated with commas.</span>  
                 </div>
               </div>
@@ -124,13 +211,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="OutsideWelcLabPrep-0">
-                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-0" value="True">
+                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-0" value="True" {% if "True"==param.OutsideWelcLabPrep %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="OutsideWelcLabPrep-1">
-                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-1" value="False" checked="checked">
+                    <input type="radio" name="OutsideWelcLabPrep" id="OutsideWelcLabPrep-1" value="False" {% if "False"==param.OutsideWelcLabPrep %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -142,13 +229,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="VirtualAccess-Y">
-                    <input type="radio" name="VirtualAccess" id="VirtualAccess-Y" value="True">
+                    <input type="radio" name="VirtualAccess" id="VirtualAccess-Y" value="True" {% if "True"==param.VirtualAccess %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="VirtualAccess-N">
-                    <input type="radio" name="VirtualAccess" id="VirtualAccess-N" value="False" checked="checked">
+                    <input type="radio" name="VirtualAccess" id="VirtualAccess-N" value="False" {% if "False"==param.VirtualAccess %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -161,13 +248,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="InWelcLabManip-0">
-                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-0" value="True">
+                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-0" value="True" {% if "True"==param.InWelcLabManip %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="InWelcLabManip-1">
-                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-1" value="False" checked="checked">
+                    <input type="radio" name="InWelcLabManip" id="InWelcLabManip-1" value="False" {% if "False"==param.InWelcLabManip %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -179,13 +266,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Storage-0">
-                    <input type="radio" name="Storage" id="Storage-0" value="welcoming_lab">
+                    <input type="radio" name="Storage" id="Storage-0" value="welcoming_lab" {% if "welcoming_lab"==param.Storage %} checked="checked"{% endif %}>
                     Within the welcoming laboratory
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Storage-1">
-                    <input type="radio" name="Storage" id="Storage-1" value="invited_lab" checked="checked">
+                    <input type="radio" name="Storage" id="Storage-1" value="invited_lab" {% if "invited_lab"==param.Storage %} checked="checked"{% endif %}>
                     Brought away to the invited laboratory
                     </label>
                   </div>
@@ -205,7 +292,7 @@
               <div class="form-group">
                 <label class="control-label" for="Chem_Formula">Formula</label>  
                 <div>
-                  <input id="Chem_Formula" name="Chem_Formula" type="text" placeholder="CaHbOcNd" class="form-control input-md">
+                  <input id="Chem_Formula" name="Chem_Formula" type="text" {% if param.Chem_Formula %} value={{param.Chem_Formula}} {% endif %} class="form-control input-md" placeholder="CaHbOcNd">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -214,31 +301,31 @@
                 <br>
                 <div class="checkbox-inline">
                   <label for="Chem_Type-0">
-                    <input type="checkbox" name="Chem_Type" id="Chem_Type-0" value="Gas">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-0" value="Gas" {% if "Gas"==param.Chem_Type %} checked="checked"{% endif %}>
                     Gas
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Chem_Type-1">
-                    <input type="checkbox" name="Chem_Type" id="Chem_Type-1" value="Powder">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-1" value="Powder" {% if "Powder"==param.Chem_Type %} checked="checked"{% endif %}>
                     Powder
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Chem_Type-2">
-                    <input type="checkbox" name="Chem_Type" id="Chem_Type-2" value="Liquid">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-2" value="Liquid" {% if "Liquid"==param.Chem_Type %} checked="checked"{% endif %}>
                     Liquid
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Chem_Type-3">
-                    <input type="checkbox" name="Chem_Type" id="Chem_Type-3" value="Film">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-3" value="Film" {% if "Film"==param.Chem_Type %} checked="checked"{% endif %}>
                     Film
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Chem_Type-4">
-                    <input type="checkbox" name="Chem_Type" id="Chem_Type-4" value="Bulk">
+                    <input type="checkbox" name="Chem_Type" id="Chem_Type-4" value="Bulk" {% if "Bulk"==param.Chem_Type %} checked="checked"{% endif %}>
                     Bulk
                   </label>
                 </div>
@@ -246,45 +333,45 @@
               <div class="form-group">
                 <label class="control-label" for="chem_solv">Chemical Solvent</label>
                   <select id="chem_solv" name="chem_solv" class="form-control">
-                    <option value="pentane">pentane</option>
-                    <option value="cyclopentane">cyclopentane</option>
-                    <option value="hexane">hexane</option>
-                    <option value="cyclohexane">cyclohexane</option>
-                    <option value="benzene">benzene</option>
-                    <option value="toluene">toluene</option>
-                    <option value="1,4-dioxane">1,4-dioxane</option>
-                    <option value="chloroform">chloroform</option>
-                    <option value="diethyl ether">diethyl ether</option>
-                    <option value="dichloromethane (DCM)">dichloromethane (DCM)</option>
-                    <option value="tetrahydrofuran (THF)">tetrahydrofuran (THF)</option>
-                    <option value="ethyl acetate">ethyl acetate</option>
-                    <option value="acetone">acetone</option>
-                    <option value="dimethylformamide (DMF)">dimethylformamide (DMF)</option>
-                    <option value="acetonitrile (MeCN)">acetonitrile (MeCN)</option>
-                    <option value="dimethyl sulfoxide (DMSO)">dimethyl sulfoxide (DMSO)</option>
-                    <option value="nitromethane">nitromethane</option>
-                    <option value="propylene carbonate">propylene carbonate</option>
-                    <option value="formic acid">formic acid</option>
-                    <option value="n-butanol">n-butanol</option>
-                    <option value="isopropyl alcohol (IPA)">isopropyl alcohol (IPA)</option>
-                    <option value="n-propanol">n-propanol</option>
-                    <option value="ethanol">ethanol</option>
-                    <option value="methanol">methanol</option>
-                    <option value="acetic acid">acetic acid</option>
-                    <option value="water">water</option>
+                    <option value="pentane" {% if "pentane"==param.chem_solv %} selected="selected"{% endif %}>pentane</option>
+                    <option value="cyclopentane" {% if "cyclopentane"==param.chem_solv %} selected="selected"{% endif %}>cyclopentane</option>
+                    <option value="hexane" {% if "hexane"==param.chem_solv %} selected="selected"{% endif %}>hexane</option>
+                    <option value="cyclohexane" {% if "cyclohexane"==param.chem_solv %} selected="selected"{% endif %}>cyclohexane</option>
+                    <option value="benzene" {% if "benzene"==param.chem_solv %} selected="selected"{% endif %}>benzene</option>
+                    <option value="toluene" {% if "toluene"==param.chem_solv %} selected="selected"{% endif %}>toluene</option>
+                    <option value="1,4-dioxane" {% if "1,4-dioxane"==param.chem_solv %} selected="selected"{% endif %}>1,4-dioxane</option>
+                    <option value="chloroform" {% if "chloroform"==param.chem_solv %} selected="selected"{% endif %}>chloroform</option>
+                    <option value="diethyl ether" {% if "diethyl ether"==param.chem_solv %} selected="selected"{% endif %}>diethyl ether</option>
+                    <option value="dichloromethane (DCM)" {% if "dichloromethane (DCM)"==param.chem_solv %} selected="selected"{% endif %}>dichloromethane (DCM)</option>
+                    <option value="tetrahydrofuran (THF)" {% if "tetrahydrofuran (THF)"==param.chem_solv %} selected="selected"{% endif %}>tetrahydrofuran (THF)</option>
+                    <option value="ethyl acetate" {% if "ethyl acetate"==param.chem_solv %} selected="selected"{% endif %}>ethyl acetate</option>
+                    <option value="acetone" {% if "acetone"==param.chem_solv %} selected="selected"{% endif %}>acetone</option>
+                    <option value="dimethylformamide (DMF)" {% if "dimethylformamide (DMF)"==param.chem_solv %} selected="selected"{% endif %}>dimethylformamide (DMF)</option>
+                    <option value="acetonitrile (MeCN)" {% if "acetonitrile (MeCN)"==param.chem_solv %} selected="selected"{% endif %}>acetonitrile (MeCN)</option>
+                    <option value="dimethyl sulfoxide (DMSO)" {% if "dimethyl sulfoxide (DMSO)"==param.chem_solv %} selected="selected"{% endif %}>dimethyl sulfoxide (DMSO)</option>
+                    <option value="nitromethane" {% if "nitromethane"==param.chem_solv %} selected="selected"{% endif %}>nitromethane</option>
+                    <option value="propylene carbonate" {% if "propylene carbonate"==param.chem_solv %} selected="selected"{% endif %}>propylene carbonate</option>
+                    <option value="formic acid" {% if "formic acid"==param.chem_solv %} selected="selected"{% endif %}>formic acid</option>
+                    <option value="n-butanol" {% if "n-butanol"==param.chem_solv %} selected="selected"{% endif %}>n-butanol</option>
+                    <option value="isopropyl alcohol (IPA)" {% if "isopropyl alcohol (IPA)"==param.chem_solv %} selected="selected"{% endif %}>isopropyl alcohol (IPA)</option>
+                    <option value="n-propanol" {% if "n-propanol"==param.chem_solv %} selected="selected"{% endif %}>n-propanol</option>
+                    <option value="ethanol" {% if "ethanol"==param.chem_solv %} selected="selected"{% endif %}>ethanol</option>
+                    <option value="methanol" {% if "methanol"==param.chem_solv %} selected="selected"{% endif %}>methanol</option>
+                    <option value="acetic acid" {% if "acetic acid"==param.chem_solv %} selected="selected"{% endif %}>acetic acid</option>
+                    <option value="water" {% if "water"==param.chem_solv %} selected="selected"{% endif %}>water</option>
                   </select>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Chem_Addit">Additives</label>  
                 <div>
-                  <input id="Chem_Addit" name="Chem_Addit" type="text" placeholder="additive1, additive2" class="form-control input-md">
+                  <input id="Chem_Addit" name="Chem_Addit" type="text" placeholder="additive1, additive2" {% if param.Chem_Addit %} value={{param.Chem_Addit}} {% endif %} class="form-control input-md">
                   <span class="help-block">List of the chemical additives in the sample, separated with commas.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Chem_Press">Packaging Pressure (bar)</label>  
                 <div>
-                  <input id="Chem_Press" name="Chem_Press" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Chem_Press" name="Chem_Press" type="number" step=any placeholder="1" {% if param.Chem_Press %} value={{param.Chem_Press}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -294,13 +381,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Tox-0">
-                    <input type="radio" name="Chem_Tox" id="Chem_Tox-0" value="True">
+                    <input type="radio" name="Chem_Tox" id="Chem_Tox-0" value="True" {% if "True"==param.Chem_Tox %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Tox-1">
-                    <input type="radio" name="Chem_Tox" id="Chem_Tox-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Tox" id="Chem_Tox-1" value="False" {% if "False"==param.Chem_Tox %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -312,13 +399,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Expl-0">
-                    <input type="radio" name="Chem_Expl" id="Chem_Expl-0" value="True">
+                    <input type="radio" name="Chem_Expl" id="Chem_Expl-0" value="True" {% if "True"==param.Chem_Expl %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Expl-1">
-                    <input type="radio" name="Chem_Expl" id="Chem_Expl-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Expl" id="Chem_Expl-1" value="False" {% if "False"==param.Chem_Expl %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -330,13 +417,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Infla-0">
-                    <input type="radio" name="Chem_Infla" id="Chem_Infla-0" value="True">
+                    <input type="radio" name="Chem_Infla" id="Chem_Infla-0" value="True" {% if "True"==param.Chem_Infla %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Infla-1">
-                    <input type="radio" name="Chem_Infla" id="Chem_Infla-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Infla" id="Chem_Infla-1" value="False" {% if "False"==param.Chem_Infla %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -348,13 +435,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Carcino-0">
-                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-0" value="True">
+                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-0" value="True" {% if "True"==param.Chem_Carcino %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Carcino-1">
-                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Carcino" id="Chem_Carcino-1" value="False" {% if "False"==param.Chem_Carcino %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -366,13 +453,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Harm-0">
-                    <input type="radio" name="Chem_Harm" id="Chem_Harm-0" value="True">
+                    <input type="radio" name="Chem_Harm" id="Chem_Harm-0" value="True" {% if "True"==param.Chem_Harm %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Harm-1">
-                    <input type="radio" name="Chem_Harm" id="Chem_Harm-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Harm" id="Chem_Harm-1" value="False" {% if "False"==param.Chem_Harm %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -384,13 +471,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Irrit-0">
-                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-0" value="True">
+                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-0" value="True" {% if "True"==param.Chem_Irrit %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Irrit-1">
-                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Irrit" id="Chem_Irrit-1" value="False" {% if "False"==param.Chem_Irrit %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -402,13 +489,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Pol-0">
-                    <input type="radio" name="Chem_Pol" id="Chem_Pol-0" value="True">
+                    <input type="radio" name="Chem_Pol" id="Chem_Pol-0" value="True" {% if "True"==param.Chem_Pol %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Pol-1">
-                    <input type="radio" name="Chem_Pol" id="Chem_Pol-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Pol" id="Chem_Pol-1" value="False" {% if "False"==param.Chem_Pol %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -420,13 +507,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Chem_Corros-0">
-                    <input type="radio" name="Chem_Corros" id="Chem_Corros-0" value="True">
+                    <input type="radio" name="Chem_Corros" id="Chem_Corros-0" value="True" {% if "True"==param.Chem_Corros %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Chem_Corros-1">
-                    <input type="radio" name="Chem_Corros" id="Chem_Corros-1" value="False" checked="checked">
+                    <input type="radio" name="Chem_Corros" id="Chem_Corros-1" value="False" {% if "False"==param.Chem_Corros %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -452,14 +539,14 @@
               <div class="form-group">
                 <label class="control-label" for="Bio_Acro">Acronym</label>  
                 <div>
-                  <input id="Bio_Acro" name="Bio_Acro" type="text" placeholder="" class="form-control input-md">
+                  <input id="Bio_Acro" name="Bio_Acro" type="text" {% if param.Bio_Acro %} value={{param.Bio_Acro}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Bio_Orig">Sample(s) Origin</label>  
                 <div>
-                  <input id="Bio_Orig" name="Bio_Orig" type="text" placeholder="" class="form-control input-md">
+                  <input id="Bio_Orig" name="Bio_Orig" type="text" {% if param.Bio_Orig %} value={{param.Bio_Orig}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -468,19 +555,19 @@
                 <br>
                 <div class="checkbox-inline">
                   <label for="Biochem_Type-1">
-                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-1" value="Powder">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-1" value="Powder" {% if "Powder"==param.Biochem_Type %} checked="checked"{% endif %}>
                     Powder
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Biochem_Type-2">
-                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-2" value="Solution">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-2" value="Solution" {% if "Solution"==param.Biochem_Type %} checked="checked"{% endif %}>
                     Solution
                   </label>
                 </div>
                 <div class="checkbox-inline">
                   <label for="Biochem_Type-4">
-                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-4" value="Bulk">
+                    <input type="checkbox" name="Biochem_Type" id="Biochem_Type-4" value="Bulk" {% if "Bulk"==param.Biochem_Type %} checked="checked"{% endif %}>
                     Bulk
                   </label>
                 </div>
@@ -490,13 +577,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Bio_WelLab_Country-0">
-                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-0" value="True">
+                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-0" value="True" {% if "True"==param.Bio_WelLab_Country %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Bio_WelLab_Country-1">
-                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-1" value="False" checked="checked">
+                    <input type="radio" name="Bio_WelLab_Country" id="Bio_WelLab_Country-1" value="False" {% if "False"==param.Bio_WelLab_Country %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -506,7 +593,7 @@
               <div class="form-group">
                 <label class="control-label" for="Bio_SampNum">Number of sample(s)</label>  
                 <div>
-                  <input id="Bio_SampNum" name="Bio_SampNum" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Bio_SampNum" name="Bio_SampNum" type="number" placeholder="1" {% if param.Bio_SampNum %} value={{param.Bio_SampNum}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -514,14 +601,14 @@
               <div class="form-group">
                 <label class="control-label" for="Bio_SampRiskGrp">Sample group of risk (*)</label>  
                 <div>
-                  <input id="Bio_SampRiskGrp" name="Bio_SampRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Bio_SampRiskGrp" name="Bio_SampRiskGrp" type="number" placeholder="1" {% if param.Bio_SampRiskGrp %} value={{param.Bio_SampRiskGrp}} {% endif %} class="form-control input-md">
                   <span class="help-block">From 1 to 4.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Bio_HostRiskGrp">Host group of risk (*)</label>  
                 <div>
-                  <input id="Bio_HostRiskGrp" name="Bio_HostRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Bio_HostRiskGrp" name="Bio_HostRiskGrp" type="number" placeholder="1" {% if param.Bio_HostRiskGrp %} value={{param.Bio_HostRiskGrp}} {% endif %} class="form-control input-md">
                   <span class="help-block">From 1 to 4.</span>  
                 </div>
               </div>
@@ -530,13 +617,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Bio_RecombSamp-0">
-                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-0" value="True">
+                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-0" value="True" {% if "True"==param.Bio_RecombSamp %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Bio_RecombSamp-1">
-                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-1" value="False" checked="checked">
+                    <input type="radio" name="Bio_RecombSamp" id="Bio_RecombSamp-1" value="False" {% if "False"==param.Bio_RecombSamp %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -548,13 +635,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Bio_ActiveVirus-0">
-                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-0" value="True">
+                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-0" value="True" {% if "True"==param.Bio_ActiveVirus %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Bio_ActiveVirus-1">
-                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-1" value="False" checked="checked">
+                    <input type="radio" name="Bio_ActiveVirus" id="Bio_ActiveVirus-1" value="False" {% if "False"==param.Bio_ActiveVirus %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -566,13 +653,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Bio_VirulFactor-0">
-                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-0" value="True">
+                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-0" value="True" {% if "True"==param.Bio_VirulFactor %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Bio_VirulFactor-1">
-                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-1" value="False" checked="checked">
+                    <input type="radio" name="Bio_VirulFactor" id="Bio_VirulFactor-1" value="False" {% if "False"==param.Bio_VirulFactor %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -584,13 +671,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Bio_Prion-0">
-                    <input type="radio" name="Bio_Prion" id="Bio_Prion-0" value="True">
+                    <input type="radio" name="Bio_Prion" id="Bio_Prion-0" value="True" {% if "True"==param.Bio_Prion %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Bio_Prion-1">
-                    <input type="radio" name="Bio_Prion" id="Bio_Prion-1" value="False" checked="checked">
+                    <input type="radio" name="Bio_Prion" id="Bio_Prion-1" value="False" {% if "False"==param.Bio_Prion %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -609,60 +696,60 @@
               <div class="form-group">
                 <label class="control-label" for="Cell_SampActivity">Is the sample</label>
                   <label class="radio-inline" for="Cell_SampActivity-0">
-                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-0" value="Active" checked="checked">
+                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-0" value="Active" {% if "Active"==param.Cell_SampActivity %} checked="checked"{% endif %}>
                     Active
                   </label> 
                   <label class="radio-inline" for="Cell_SampActivity-1">
-                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-1" value="Dead">
+                    <input type="radio" name="Cell_SampActivity" id="Cell_SampActivity-1" value="Dead" {% if "Dead"==param.Cell_SampActivity %} checked="checked"{% endif %}>
                     Dead
                   </label>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Cell_CellTissueSamp">Is the sample</label>
                   <label class="radio-inline" for="Cell_CellTissueSamp-0">
-                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-0" value="Cellular" checked="checked">
+                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-0" value="Cellular" {% if "Cellular"==param.Cell_CellTissueSamp %} checked="checked"{% endif %}>
                     Cellular
                   </label> 
                   <label class="radio-inline" for="Cell_CellTissueSamp-1">
-                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-1" value="Tissue">
+                    <input type="radio" name="Cell_CellTissueSamp" id="Cell_CellTissueSamp-1" value="Tissue" {% if "Tissue"==param.Cell_CellTissueSamp %} checked="checked"{% endif %}>
                     Tissue
                   </label>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Cell_SampType">Sample Type</label>
                   <label class="checkbox-inline" for="Cell_SampType-0">
-                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-0" value="Human">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-0" value="Human" {% if "Human"==param.Cell_SampType %} checked="checked"{% endif %}>
                     Human
                   </label>
                   <label class="checkbox-inline" for="Cell_SampType-1">
-                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-1" value="Animal">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-1" value="Animal" {% if "Animal"==param.Cell_SampType %} checked="checked"{% endif %}>
                     Animal
                   </label>
                   <label class="checkbox-inline" for="Cell_SampType-2">
-                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-2" value="Bacterial">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-2" value="Bacterial" {% if "Bacterial"==param.Cell_SampType %} checked="checked"{% endif %}>
                     Bacterial
                   </label>
                   <label class="checkbox-inline" for="Cell_SampType-3">
-                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-3" value="Vegetal">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-3" value="Vegetal" {% if "Vegetal"==param.Cell_SampType %} checked="checked"{% endif %}>
                     Vegetal
                   </label>
                   <label class="checkbox-inline" for="Cell_SampType-4">
-                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-4" value="Yeast">
+                    <input type="checkbox" name="Cell_SampType" id="Cell_SampType-4" value="Yeast" {% if "Yeast"==param.Cell_SampType %} checked="checked"{% endif %}>
                     Yeast
                   </label>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Cell_CellOrigSamp">Does the sample originate from</label>
                   <label class="checkbox-inline" for="Cell_CellOrigSamp-0">
-                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-0" value="Primary line">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-0" value="Primary line" {% if "Primary line"==param.Cell_CellOrigSamp %} checked="checked"{% endif %}>
                     Primary line
                   </label>
                   <label class="checkbox-inline" for="Cell_CellOrigSamp-1">
-                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-1" value="Cell immortalized tumor line">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-1" value="Cell immortalized tumor line" {% if "Cell immortalized tumor line"==param.Cell_CellOrigSamp %} checked="checked"{% endif %}>
                     Cell immortalized tumor line
                   </label>
                   <label class="checkbox-inline" for="Cell_CellOrigSamp-2">
-                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-2" value="Stem cell">
+                    <input type="checkbox" name="Cell_CellOrigSamp" id="Cell_CellOrigSamp-2" value="Stem cell" {% if "Stem cell"==param.Cell_CellOrigSamp %} checked="checked"{% endif %}>
                     Stem cell
                   </label>
               </div>
@@ -671,13 +758,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Cell_GMO-0">
-                    <input type="radio" name="Cell_GMO" id="Cell_GMO-0" value="True">
+                    <input type="radio" name="Cell_GMO" id="Cell_GMO-0" value="True" {% if "True"==param.Cell_GMO %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Cell_GMO-1">
-                    <input type="radio" name="Cell_GMO" id="Cell_GMO-1" value="False" checked="checked">
+                    <input type="radio" name="Cell_GMO" id="Cell_GMO-1" value="False" {% if "False"==param.Cell_GMO %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -687,7 +774,7 @@
               <div class="form-group">
                 <label class="control-label" for="Cell_Strain">For bacterial or viral origin specify strain</label>  
                 <div>
-                  <input id="Cell_Strain" name="Cell_Strain" type="text" placeholder="1" class="form-control input-md">
+                  <input id="Cell_Strain" name="Cell_Strain" type="text" placeholder="1" {% if param.Cell_Strain %} value={{param.Cell_Strain}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -696,13 +783,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Cell_WelLab_Country-0">
-                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-0" value="True">
+                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-0" value="True" {% if "True"==param.Cell_WelLab_Country %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Cell_WelLab_Country-1">
-                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-1" value="False" checked="checked">
+                    <input type="radio" name="Cell_WelLab_Country" id="Cell_WelLab_Country-1" value="False" {% if "False"==param.Cell_WelLab_Country %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -712,7 +799,7 @@
               <div class="form-group">
                 <label class="control-label" for="Cell_SampNum">Number of sample(s)</label>  
                 <div>
-                  <input id="Cell_SampNum" name="Cell_SampNum" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Cell_SampNum" name="Cell_SampNum" type="number" placeholder="1" {% if param.Bio_SampNum %} value={{param.Bio_SampNum}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -720,7 +807,7 @@
               <div class="form-group">
                 <label class="control-label" for="Cell_SampRiskGrp">Sample group of risk (*)</label>  
                 <div>
-                  <input id="Cell_SampRiskGrp" name="Cell_SampRiskGrp" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Cell_SampRiskGrp" name="Cell_SampRiskGrp" type="number" placeholder="1" {% if param.Cell_SampRiskGrp %} value={{param.Cell_SampRiskGrp}} {% endif %} class="form-control input-md">
                   <span class="help-block">From 1 to 4.</span>  
                 </div>
               </div>
@@ -729,13 +816,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Cell_VirulFactor-0">
-                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-0" value="True">
+                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-0" value="True" {% if "True"==param.Cell_VirulFactor %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Cell_VirulFactor-1">
-                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-1" value="False" checked="checked">
+                    <input type="radio" name="Cell_VirulFactor" id="Cell_VirulFactor-1" value="False" {% if "False"==param.Cell_VirulFactor %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -747,13 +834,13 @@
                 <div>
                   <div class="radio-inline">
                     <label for="Cell_Prion-0">
-                    <input type="radio" name="Cell_Prion" id="Cell_Prion-0" value="True">
+                    <input type="radio" name="Cell_Prion" id="Cell_Prion-0" value="True" {% if "True"==param.Cell_Prion %} checked="checked"{% endif %}>
                     Yes
                     </label>
                   </div>
                   <div class="radio-inline">
                     <label for="Cell_Prion-1">
-                    <input type="radio" name="Cell_Prion" id="Cell_Prion-1" value="False" checked="checked">
+                    <input type="radio" name="Cell_Prion" id="Cell_Prion-1" value="False" {% if "False"==param.Cell_Prion %} checked="checked"{% endif %}>
                     No
                     </label>
                   </div>
@@ -770,31 +857,31 @@
             <br>
             <div class="radio-inline">
               <label for="DirectInjection">
-                <input type="radio" name="SetUpMethod" id="DirectInjection" value="DirectInjection" required>
+                <input type="radio" name="SetUpMethod" id="DirectInjection" value="DirectInjection" {% if "DirectInjection"==param.SetUpMethod %} checked="checked"{% endif %} required>
                 Direct Injection
               </label>
             </div>
             <div class="radio-inline">
               <label for="Chromatography">
-                <input type="radio" name="SetUpMethod" id="Chromatography" value="Chromatography" required>
+                <input type="radio" name="SetUpMethod" id="Chromatography" value="Chromatography" {% if "Chromatography"==param.SetUpMethod %} checked="checked"{% endif %} required>
                 Chromatography (LC/GC)
               </label>
             </div>
             <div class="radio-inline">
               <label for="Imaging">
-                <input type="radio" name="SetUpMethod" id="Imaging" value="Imaging" required>
+                <input type="radio" name="SetUpMethod" id="Imaging" value="Imaging" {% if "Imaging"==param.SetUpMethod %} checked="checked"{% endif %} required>
                 Imaging
               </label>
             </div>
             <div class="radio-inline">
               <label for="CLIO">
-                <input type="radio" name="SetUpMethod" id="CLIO" value="CLIO" required>
+                <input type="radio" name="SetUpMethod" id="CLIO" value="CLIO" {% if "CLIO"==param.SetUpMethod %} checked="checked"{% endif %} required>
                 CLIO Laser
               </label>
             </div>
             <div class="radio-inline">
               <label for="2DMS">
-                <input type="radio" name="SetUpMethod" id="2DMS" value="2DMS" required>
+                <input type="radio" name="SetUpMethod" id="2DMS" value="2DMS" {% if "2DMS"==param.SetUpMethod %} checked="checked"{% endif %} required>
                 2D-MS
               </label>
             </div>
@@ -808,7 +895,7 @@
               <div class="form-group">
                 <label class="control-label" for="DI_Solvent">Solvent</label>  
                 <div>
-                  <input id="DI_Solvent" name="DI_Solvent" type="text" placeholder="" class="form-control input-md">
+                  <input id="DI_Solvent" name="DI_Solvent" type="text" placeholder="" {% if param.DI_Solvent %} value={{param.DI_Solvent}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -823,35 +910,35 @@
               <div class="form-group">
                 <label class="control-label" for="ChromatoSys_Ref">Chromatographic system reference</label>  
                 <div>
-                  <input id="ChromatoSys_Ref" name="ChromatoSys_Ref" type="text" placeholder="" class="form-control input-md">
+                  <input id="ChromatoSys_Ref" name="ChromatoSys_Ref" type="text" placeholder="" {% if param.ChromatoSys_Ref %} value={{param.ChromatoSys_Ref}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Column_Construct">Constructor name for separation column</label>  
                 <div>
-                  <input id="Column_Construct" name="Column_Construct" type="text" placeholder="constructorA" class="form-control input-md">
+                  <input id="Column_Construct" name="Column_Construct" type="text" placeholder="constructorA" {% if param.Column_Construct %} value={{param.Column_Construct}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Column_Ref">Separation column reference</label>  
                 <div>
-                  <input id="Column_Ref" name="Column_Ref" type="text" placeholder="RefB" class="form-control input-md">
+                  <input id="Column_Ref" name="Column_Ref" type="text" placeholder="RefB" {% if param.Column_Ref %} value={{param.Column_Ref}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Chromato_Solvents">Solvents</label>  
                 <div>
-                  <input id="Chromato_Solvents" name="Chromato_Solvents" type="text" placeholder="" class="form-control input-md">
+                  <input id="Chromato_Solvents" name="Chromato_Solvents" type="text" placeholder="" {% if param.Chromato_Solvents %} value={{param.Chromato_Solvents}} {% endif %} class="form-control input-md">
                   <span class="help-block">Separated by commas.</span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Chromato_Method_Filename">Filename/Path of the chromatographic method</label>  
                 <div>
-                  <input id="Chromato_Method_Filename" name="Chromato_Method_Filename" type="text" placeholder="" class="form-control input-md">
+                  <input id="Chromato_Method_Filename" name="Chromato_Method_Filename" type="text" placeholder="" {% if param.Chromato_Method_Filename %} value={{param.Chromato_Method_Filename}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -866,21 +953,21 @@
               <div class="form-group">
                 <label class="control-label" for="Lateral_Resol">Lateral Resolution</label>  
                 <div>
-                  <input id="Lateral_Resol" name="Lateral_Resol" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Lateral_Resol" name="Lateral_Resol" type="number" step=any placeholder="1" {% if param.Lateral_Resol %} value={{param.Lateral_Resol}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Spot_Size">Spot laser size</label>  
                 <div>
-                  <input id="Spot_Size" name="Spot_Size" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Spot_Size" name="Spot_Size" type="number" step=any placeholder="1" class="form-control input-md" {% if param.Spot_Size %} value={{param.Spot_Size}} {% endif %}>
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="Spots_Dist">Spots distance</label>  
                 <div>
-                  <input id="Spots_Dist" name="Spots_Dist" type="number" placeholder="1" class="form-control input-md">
+                  <input id="Spots_Dist" name="Spots_Dist" type="number" step=any placeholder="1" {% if param.Spots_Dist %} value={{param.Spots_Dist}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -895,14 +982,14 @@
               <div class="form-group">
                 <label class="control-label" for="Wavelength_Func">&lambda; = f(t)</label>  
                 <div>
-                  <input id="Wavelength_Func" name="Wavelength_Func" type="text" placeholder="a+bt" class="form-control input-md">
+                  <input id="Wavelength_Func" name="Wavelength_Func" type="text" placeholder="a+bt" {% if param.Wavelength_Func %} value={{param.Wavelength_Func}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
                 <label class="control-label" for="CLIO_calib_file">CLIO Calibration Filename</label>  
                 <div>
-                  <input id="CLIO_calib_file" name="CLIO_calib_file" type="text" placeholder="/path/to/myfile.ext" class="form-control input-md">
+                  <input id="CLIO_calib_file" name="CLIO_calib_file" type="text" placeholder="/path/to/myfile.ext" {% if param.CLIO_calib_file %} value={{param.CLIO_calib_file}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -915,37 +1002,37 @@
             </div>
             <div class="panel-body" style="display: block;">
               <div class="form-group">
-                <label class="control-label" for="2D_Method">Method used</label>  
+                <label class="control-label" for="TwoD_Method">Method used</label>  
                 <div>
-                  <input id="2D_Method" name="2D_Method" type="text" placeholder="" class="form-control input-md">
+                  <input id="TwoD_Method" name="TwoD_Method" type="text" class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="2D_Exc_Pulses">Frequency range of the excitation pulses (Hz)</label>  
+                <label class="control-label" for="TwoD_Exc_Pulses">Frequency range of the excitation pulses (Hz)</label>  
                 <div>
-                  <input id="2D_Exc_Pulses" name="2D_Exc_Pulses" type="text" placeholder="460655, 263228" class="form-control input-md">
+                  <input id="TwoD_Exc_Pulses" name="TwoD_Exc_Pulses" type="text" placeholder="460655, 263228" {% if param.TwoD_Exc_Pulses %} value={{param.TwoD_Exc_Pulses}} {% endif %} class="form-control input-md">
                   <span class="help-block">Separate beginning and end with comma.</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="2D_Nf_meas">Nyquist Frequency Nf used for measurements (Hz)</label>  
+                <label class="control-label" for="TwoD_Nf_meas">Nyquist Frequency Nf used for measurements (Hz)</label>  
                 <div>
-                  <input id="2D_Nf_meas" name="2D_Nf_meas" type="number" placeholder="500000" class="form-control input-md">
+                  <input id="TwoD_Nf_meas" name="TwoD_Nf_meas" type="number" step=any placeholder="500000" {% if param.TwoD_Nf_meas %} value={{param.TwoD_Nf_meas}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="2D_Obs_Pulse">Frequency range of the observed pulse (Hz)</label>  
+                <label class="control-label" for="TwoD_Obs_Pulse">Frequency range of the observed pulse (Hz)</label>  
                 <div>
-                  <input id="2D_Obs_Pulse" name="2D_Obs_Pulse" type="text" placeholder="1250095, 61418" class="form-control input-md">
+                  <input id="TwoD_Obs_Pulse" name="TwoD_Obs_Pulse" type="text" placeholder="1250095, 61418" {% if param.TwoD_Obs_Pulse %} value={{param.TwoD_Obs_Pulse}} {% endif %} class="form-control input-md">
                   <span class="help-block">Separate beginning and end with comma.</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="2D_NUS_Delay_file">NUS Delay list filename</label>  
+                <label class="control-label" for="TwoD_NUS_Delay_file">NUS Delay list filename</label>  
                 <div>
-                  <input id="2D_NUS_Delay_file" name="2D_NUS_Delay_file" type="text" placeholder="" class="form-control input-md">
+                  <input id="TwoD_NUS_Delay_file" name="TwoD_NUS_Delay_file" type="text" {% if param.TwoD_NUS_Delay_file %} value={{param.TwoD_NUS_Delay_file}} {% endif %} class="form-control input-md">
                   <span class="help-block"></span>  
                 </div>
               </div>
@@ -960,17 +1047,17 @@
             </div>
             <div class="panel-body" style="display: block;">
               <div class="form-group">
-                <label class="control-label required" for="spectrometer_type">Spectrometer Type?</label>
+                <label class="control-label required" for="SpectrometerType">Spectrometer Type?</label>
                 <div>
                   <div class="radio-inline">
-                    <label for="spectrometer_type-0">
-                    <input type="radio" name="spectrometer_type" id="spectrometer_type-0" required value="Solarix" {% if "Solarix"==param.SpectrometerType %} checked="checked"{% endif %}>
+                    <label for="SpectrometerType-0">
+                    <input type="radio" name="SpectrometerType" id="SpectrometerType-0" required value="Solarix" {% if "Solarix"==param.SpectrometerType %} checked="checked"{% endif %}>
                     Solarix
                     </label>
                   </div>
                   <div class="radio-inline">
-                    <label for="spectrometer_type-1">
-                    <input type="radio" name="spectrometer_type" id="spectrometer_type-1" required value="Apex" {% if "Apex"==param.SpectrometerType %} checked="checked"{% endif %}>
+                    <label for="SpectrometerType-1">
+                    <input type="radio" name="SpectrometerType" id="SpectrometerType-1" required value="Apex" {% if "Apex"==param.SpectrometerType %} checked="checked"{% endif %}>
                     Apex
                     </label>
                   </div>
@@ -982,37 +1069,37 @@
                 <div>
                   <div class="radio">
                     <label for="Spectro_Source-1">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1" value="ESI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1" value="ESI" {% if "ESI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     ESI
                     </label>
                   </div>
                   <div class="radio">
                     <label for="Spectro_Source-1bis">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1bis" value="NanoESI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-1bis" value="NanoESI" {% if "NanoESI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     NanoESI
                     </label>
                   </div>
                   <div class="radio">
                     <label for="Spectro_Source-2">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-2" value="MALDI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-2" value="MALDI" {% if "MALDI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     MALDI
                     </label>
                   </div>
                   <div class="radio">
                     <label for="Spectro_Source-3">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-3" value="APCI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-3" value="APCI" {% if "APCI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     APCI
                     </label>
                   </div>
                   <div class="radio">
                     <label for="Spectro_Source-4">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-4" value="APLI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-4" value="APLI" {% if "APLI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     APLI
                     </label>
                   </div>
                   <div class="radio">
                     <label for="Spectro_Source-5">
-                    <input type="radio" name="Spectro_Source" id="Spectro_Source-5" value="APPI" required>
+                    <input type="radio" name="Spectro_Source" id="Spectro_Source-5" value="APPI" {% if "APPI"==param.Spectro_Source %} checked="checked"{% endif %} required>
                     APPI
                     </label>
                   </div>
@@ -1023,35 +1110,35 @@
                 <div class="form-group">
                 <label class="control-label" for="ESIFlow">Flow?</label>  
                   <div>
-                    <input id="ESIFlow" name="ESIFlow" type="number" placeholder="" class="form-control input-md">
+                    <input id="ESIFlow" name="ESIFlow" type="number" step=any placeholder="" {% if param.ESIFlow %} value={{param.ESIFlow}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                 <label class="control-label" for="ESISprayShield">SprayShield?</label>  
                   <div>
-                    <input id="ESISprayShield" name="ESISprayShield" type="number" placeholder="" class="form-control input-md">
+                    <input id="ESISprayShield" name="ESISprayShield" type="number" step=any placeholder="" {% if param.ESISprayShield %} value={{param.ESISprayShield}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="control-label" for="ESINeedleVoltage">Needle Voltage?</label>  
                     <div>
-                      <input id="ESINeedleVoltage" name="ESINeedleVoltage" type="number" placeholder="" class="form-control input-md">
+                      <input id="ESINeedleVoltage" name="ESINeedleVoltage" type="number" step=any placeholder="" {% if param.ESINeedleVoltage %} value={{param.ESINeedleVoltage}} {% endif %} class="form-control input-md">
                       <span class="help-block"></span>  
                     </div>
                 </div>
                 <div class="form-group">
                   <label class="control-label" for="ESICapillaryEntrance">Capillary Entrance?</label>  
                     <div>
-                      <input id="ESICapillaryEntrance" name="ESICapillaryEntrance" type="number" placeholder="" class="form-control input-md">
+                      <input id="ESICapillaryEntrance" name="ESICapillaryEntrance" type="number" step=any placeholder="" {% if param.ESICapillaryEntrance %} value={{param.ESICapillaryEntrance}} {% endif %} class="form-control input-md">
                       <span class="help-block"></span>  
                     </div>
                 </div>
                 <div class="form-group">
                   <label class="control-label" for="ESICapillaryExit">Capillary Exit?</label>  
                     <div>
-                      <input id="ESICapillaryExit" name="ESICapillaryExit" type="number" placeholder="" class="form-control input-md">
+                      <input id="ESICapillaryExit" name="ESICapillaryExit" type="number" step=any placeholder="" {% if param.ESICapillaryExit %} value={{param.ESICapillaryExit}} {% endif %} class="form-control input-md">
                       <span class="help-block"></span>  
                     </div>
                 </div>
@@ -1060,21 +1147,21 @@
                 <div class="form-group">
                 <label class="control-label" for="MALDIMatrix">Matrix?</label>  
                   <div>
-                    <input id="MALDIMatrix" name="MALDIMatrix" type="text" placeholder="" class="form-control input-md">
+                    <input id="MALDIMatrix" name="MALDIMatrix" type="text" placeholder="" {% if param.MALDIMatrix %} value={{param.MALDIMatrix}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                 <label class="control-label" for="MALDILaserShots">Laser shots per scan?</label>
                   <div>
-                    <input id="MALDILaserShots" name="MALDILaserShots" type="number" placeholder="" class="form-control input-md">
+                    <input id="MALDILaserShots" name="MALDILaserShots" type="number" step=any placeholder="" {% if param.MALDILaserShots %} value={{param.MALDILaserShots}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                 <label class="control-label" for="MALDIWavelength">Laser &lambda;? (nm)</label>
                   <div>
-                    <input id="MALDIWavelength" name="MALDIWavelength" type="number" value="337" class="form-control input-md">
+                    <input id="MALDIWavelength" name="MALDIWavelength" type="number" step=any value="337" {% if param.MALDIWavelength %} value={{param.MALDIWavelength}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
@@ -1083,7 +1170,7 @@
                 <div class="form-group">
                   <label class="control-label" for="APCINeedleVoltage">Needle Voltage?</label>  
                     <div>
-                      <input id="APCINeedleVoltage" name="APCINeedleVoltage" type="number" placeholder="" class="form-control input-md">
+                      <input id="APCINeedleVoltage" name="APCINeedleVoltage" type="number" step=any placeholder="" {% if param.APCINeedleVoltage %} value={{param.APCINeedleVoltage}} {% endif %} class="form-control input-md">
                       <span class="help-block"></span>  
                     </div>
                 </div>
@@ -1092,14 +1179,14 @@
                 <div class="form-group">
                 <label class="control-label" for="APLILaserShots">Laser shots per scan?</label>
                   <div>
-                    <input id="APLILaserShots" name="APLILaserShots" type="number" placeholder="" class="form-control input-md">
+                    <input id="APLILaserShots" name="APLILaserShots" type="number" step=any placeholder="" {% if param.APLILaserShots %} value={{param.APLILaserShots}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                 <label class="control-label" for="APLIWavelength">Laser &lambda;? (nm)</label>
                   <div>
-                    <input id="APLIWavelength" name="APLIWavelength" type="number" value="337" class="form-control input-md">
+                    <input id="APLIWavelength" name="APLIWavelength" type="number" step=any value="337" {% if param.APLIWavelength %} value={{param.APLIWavelength}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
@@ -1108,28 +1195,28 @@
                 <div class="form-group">
                 <label class="control-label" for="APPILamp">Lamp?</label>
                   <div>
-                    <input id="APPILamp" name="APPILamp" type="text" placeholder="N2 Lamp" class="form-control input-md">
+                    <input id="APPILamp" name="APPILamp" type="text" placeholder="N2 Lamp" {% if param.APPILamp %} value={{param.APPILamp}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
                 <div class="form-group">
                 <label class="control-label" for="APPIWavelength">Laser &lambda;? (nm)</label>
                   <div>
-                    <input id="APPIWavelength" name="APPIWavelength" type="number" value="337" class="form-control input-md">
+                    <input id="APPIWavelength" name="APPIWavelength" type="number" step=any value="337" {% if param.APPIWavelength %} value={{param.APPIWavelength}} {% endif %} class="form-control input-md">
                     <span class="help-block"></span>  
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label required" for="B0">B0</label>  
+                <label class="control-label required" for="MagneticB0">MagneticB0</label>  
                   <div>
-                    <input id="B0" name="B0" type="number" placeholder="" class="form-control input-md" value={{param.B0}} required>
+                    <input id="MagneticB0" name="MagneticB0" type="number" step=any placeholder="" class="form-control input-md" {% if param.MagneticB0 %} value={{param.MagneticB0}} {% endif %}required>
                     <span class="help-block">Magnetic Field Value (automatically calculated with ML3 if .d imported).</span>  
                   </div>
               </div>
             </div>
           </div>
-              <div class="panel panel-info">
+          <div class="panel panel-info">
               <div class="panel-heading">
                 <h3 class="panel-title">Acquisition</h3>
                 <span class="pull-right clickable panel-collapsed"><i class="glyphicon glyphicon-chevron-down"></i></span>
@@ -1138,83 +1225,83 @@
                 <div class="form-group">
                   <label for="AcqDate" class="col-2 col-form-label">Acquisition Date</label>
                   <div>
-                    <input class="form-control" type="date" value="2011-08-19" id="AcqDate">
+                    <input class="form-control" type="text" placeholder="DD-MM-YYYY" {% if param.AcqDate %} value={{param.AcqDate}} {% endif %} id="AcqDate">
                   </div>
                 </div>
                 <div class="form-group">
-                <label class="control-label" for="EXC_hi">EXC_hi</label>  
+                <label class="control-label" for="ExcHighMass">ExcHighMass</label>  
                 <div>
-                  <input id="EXC_hi" name="EXC_hi" type="number" placeholder="" class="form-control input-md" value={{param.EXC_hi}}>
+                  <input id="ExcHighMass" name="ExcHighMass" type="number" step=any placeholder="" class="form-control input-md" value={{param.ExcHighMass}}>
                   <span class="help-block">There will be help here!</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="EXC_low">EXC_low</label>  
+                <label class="control-label" for="ExcLowMass">ExcLowMass</label>  
                 <div>
-                  <input id="EXC_low" name="EXC_low" type="number" placeholder="" class="form-control input-md" value={{param.EXC_low}}>
+                  <input id="ExcLowMass" name="ExcLowMass" type="number" step=any placeholder="" class="form-control input-md" value={{param.ExcLowMass}}>
                   <span class="help-block">There will be help here!</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="SW_h">SW_h</label>  
+                <label class="control-label" for="SpectralWidth">SpectralWidth</label>  
                 <div>
-                  <input id="SW_h" name="SW_h" type="number" placeholder="" class="form-control input-md" value={{param.SW_h}}>
+                  <input id="SpectralWidth" name="SpectralWidth" type="number" step=any placeholder="" class="form-control input-md" value={{param.SpectralWidth}}>
                   <span class="help-block">Spectral Width (Hz)</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="TD">TD</label>  
+                <label class="control-label" for="AcqSize">AcqSize</label>  
                 <div>
-                  <input id="TD" name="TD" type="number" placeholder="" class="form-control input-md" value={{param.TD}}>
+                  <input id="AcqSize" name="AcqSize" type="number" step=any placeholder="" class="form-control input-md" value={{param.AcqSize}}>
                   <span class="help-block">Data Size</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="ML1">ML1</label>  
+                <label class="control-label" for="CalibrationA">CalibrationA</label>  
                 <div>
-                  <input id="ML1" name="ML1" type="number" placeholder="" class="form-control input-md" value={{param.ML1}}>
+                  <input id="CalibrationA" name="CalibrationA" type="number" step=any placeholder="" class="form-control input-md" value={{param.CalibrationA}}>
                   <span class="help-block">1st Calibration Parameter</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="ML2">ML2</label>  
+                <label class="control-label" for="CalibrationB">CalibrationB</label>  
                 <div>
-                  <input id="ML2" name="ML2" type="number" placeholder="" class="form-control input-md" value={{param.ML2}}>
+                  <input id="CalibrationB" name="CalibrationB" type="number" step=any placeholder="" class="form-control input-md" value={{param.CalibrationB}}>
                   <span class="help-block">2nd Calibration Parameter</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="ML3">ML3</label>  
+                <label class="control-label" for="CalibrationC">CalibrationC</label>  
                 <div>
-                  <input id="ML3" name="ML3" type="number" placeholder="" class="form-control input-md" value={{param.ML3}}>
+                  <input id="CalibrationC" name="CalibrationC" type="number" step=any placeholder="" class="form-control input-md" value={{param.CalibrationC}}>
                   <span class="help-block">3d Calibration Parameter (Optional: if 0, 2 parameters mode)</span>  
                 </div>
               </div>
               <div class="form-group">
-                <label class="control-label" for="PULPROG">PULPROG</label>  
+                <label class="control-label" for="PulseProgam">PulseProgam</label>  
                 <div>
-                  <input id="PULPROG" name="PULPROG" type="text" placeholder="" class="form-control input-md" value={{param.PULPROG}}>
+                  <input id="PulseProgam" name="PulseProgam" type="text" placeholder="" class="form-control input-md" value={{param.PulseProgam}}>
                   <span class="help-block">Name of Pulse Sequence</span>  
                 </div>
               </div>      
               <div class="form-group">
-                <label class="control-label" for="NB_Step">NB_Step</label>  
+                <label class="control-label" for="ExcNumberSteps">ExcNumberSteps</label>  
                 <div>
-                  <input id="NB_Step" name="NB_Step" type="number" placeholder="" class="form-control input-md" value={{param.NBStep}}>
+                  <input id="ExcNumberSteps" name="ExcNumberSteps" type="number" step=any placeholder="" class="form-control input-md" value={{param.ExcNumberSteps}}>
                   <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
                 </div>
               </div>  
               <div class="form-group">
-                <label class="control-label" for="1stExciteSweep">1st ExciteSweep</label>  
+                <label class="control-label" for="ExcSweepFirst">1st ExciteSweep</label>  
                 <div>
-                  <input id="1stExciteSweep" name="1stExciteSweep" type="number" placeholder="" class="form-control input-md" value={{param.ExciteSweep1st}}>
+                  <input id="ExcSweepFirst" name="ExcSweepFirst" type="number" step=any placeholder="" class="form-control input-md" value={{param.ExcSweepFirst}}>
                   <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
                 </div>
               </div> 
               <div class="form-group">
-                <label class="control-label" for="LastExciteSweep">Last ExciteSweep</label>  
+                <label class="control-label" for="ExcSweepLast">Last ExciteSweep</label>  
                 <div>
-                  <input id="LastExciteSweep" name="LastExciteSweep" type="number" placeholder="" class="form-control input-md" value={{param.ExciteSweepLast}}>
+                  <input id="ExcSweepLast" name="ExcSweepLast" type="number" step=any placeholder="" class="form-control input-md" value={{param.ExcSweepLast}}>
                   <span class="help-block">This is only for <strong>Solarix</strong> experiments.</span>  
                 </div>
               </div> 
@@ -1223,20 +1310,20 @@
           <H3><U><strong>4. Raw Data Preprocessing</strong></U></H3>
           <div class="form-group">
             <label for="RawPreprocess">Enter here information about any raw data preprocessing which took place.</label>
-            <textarea class="form-control" id="RawPreprocess" rows="3"></textarea>
+            <textarea class="form-control" id="RawPreprocess" name="RawPreprocess" rows="3" {% if param.RawPreprocess %} value={{param.RawPreprocess}} {% endif %}></textarea>
             <span class="help-block">Please, be as precise as possible.</span>  
           </div>
           <H3><U><strong>5. Additional Comments</strong></U></H3>
           <div class="form-group">
             <label for="Comment">Comment</label>
-            <textarea class="form-control" id="Comment" rows="3"></textarea>
+            <textarea class="form-control" id="Comment" name="Comment" rows="3" {% if param.Comment %} value={{param.Comment}} {% endif %}></textarea>
             <span class="help-block">Feel free to insert here any additional comment you want to be present within the metadata file.</span>  
           </div>
         </div>
   </div>
     <div class="row" style="text-align: justify">
         <div class="form-group" style="text-align: center;border-bottom-width:4px;border-bottom-color:#89c8e2;border-bottom-style:solid;">
-          <button name="submit" type="submit" class="btn btn-success">Generate the configuration file</button>
+          <button name="submit" type=submit class="btn btn-success">Generate the metadata file</button>
           <p><a></a></p>
           <br>
         </div>
@@ -1376,5 +1463,6 @@
         $("#2DMSPanel").show();
     });
     });
+document.getElementById('markdown').innerHTML = marked(document.getElementById('text').value); 
 </script>
 {% endblock %}
