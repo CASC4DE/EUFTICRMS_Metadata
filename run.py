@@ -5,8 +5,8 @@
  Flask interface for the generation of a metadata file for FTICR.
 
  *******************************************************************
- * Author: Laura Duciel
- * Copyright (c) 2019
+ * Authors: Laura Duciel - Marc-André Delsuc
+ * Copyright (c) 2020
  * CASC4DE
  * Pôle API - 300 Bd Sebastien Brant, 67400 Illkirch Graffenstaden, FRANCE
  *
@@ -47,7 +47,7 @@ Debug = False            # Debug Flask
 debug = False
 PORT = 5005
 app = Flask(__name__)
-app.secret_key = '8be0cef36ed602cf769e8bf67ec6acf9f4f7093f'
+app.secret_key = 'thisisasecret'
 
 def init():
     "prgm initialisation"
@@ -70,8 +70,6 @@ UPLOAD_FOLDER = opj(TMP,'imports')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-ALLOWED_EXTENSIONS = set(['mscf'])
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
@@ -80,6 +78,10 @@ def index():
     return redirect(url_for('create_metadata'))
 
 def find_param_file(ExpName):
+    """
+    Used to find a parameter file within an experiment folder from expname (name of the folder)
+    return the kind of of parameter file (metadata or bruker) and the path to the file
+    """
     param_file_type = None
     BaseExpName = ExpName.strip('.')[:-2] 
     print("BaseExpName:",BaseExpName)
@@ -109,9 +111,12 @@ def find_param_file(ExpName):
 
 @app.route('/import_folder', methods=['GET', 'POST'])
 def import_folder():
+    """
+    Used to import project folder into what is called "Metadata_Upload_Folder" and which is used as a base directory to find experiments.
+    """
     working_dir=os.getcwd()
     print("working dir:",working_dir) 
-    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
+    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder') #This folder is created if not exist
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     if request.method == 'POST':
@@ -120,8 +125,8 @@ def import_folder():
         if l != []:
             print("Content of Upload Folder:",l)
             to_rm = "rm -rf "+str(opj(user_UPLOAD_FOLDER,l[0]))
-            print("To RM:",to_rm)
-            os.system(to_rm)
+            print("To RM:",to_rm) 
+            os.system(to_rm) #The folder is emptied before uploading new project folder
         print("Configuration import ...")
         Files = request.files.getlist("file")
         for ff in  Files:
@@ -132,28 +137,6 @@ def import_folder():
         return redirect(url_for('create_metadata'))
     else:
         return redirect(url_for('create_metadata'))
-
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    working_dir=os.getcwd()
-    print("working dir:",working_dir) 
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(user_dir, filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-    return redirect(url_for('create_metadata'))
 
 @app.route('/select_experiment', methods=['GET', 'POST'])
 def select_experiment():
@@ -174,10 +157,6 @@ def select_experiment():
         return redirect(url_for('create_metadata', ExpName=ExpName))
     else:
         return redirect(url_for('create_metadata'))
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def clear(direc):
     if os.path.exists(direc):
@@ -261,8 +240,7 @@ def generate_reduced_params(param_file, param_file_type, expfold):
 @app.route('/create_metadata/<ExpName>', methods=['GET','POST'])
 def create_metadata(ExpName):
     '''
-    Metadata form, chdir to the user home directory
-    still some inputs and the output to fix! (specifically dates and imports) 
+    Metadata form, working in current dir
     '''
     global TMP
     ExpList = []
