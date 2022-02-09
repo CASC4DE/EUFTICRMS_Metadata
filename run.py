@@ -17,7 +17,7 @@
 """
 from __future__ import print_function, division, absolute_import
 
-import sys, io, pwd, socket, urllib.request, fcntl, re, zipfile, tempfile, subprocess, time, errno, os, json, glob,psutil,calendar
+import sys, io, socket, urllib.request, re, zipfile, tempfile, subprocess, time, errno, os, json, glob,psutil,calendar
 urlopen = urllib.request.urlopen
 from flask import render_template, flash, redirect, url_for, request, send_from_directory
 op, opd, opb, opj = os.path, os.path.dirname, os.path.basename, os.path.join
