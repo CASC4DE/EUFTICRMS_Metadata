@@ -32,6 +32,6 @@ As stated in the requirements.txt, the following libraries are required to run t
 * matplotlib==1.16.0
 * scipy==1.8.0
 * tables==3.7.0
-* numpy==1.19.5
+* numpy==1.21.0
 * psutil==5.9.0
 * python_dateutil==2.8.2
