@@ -10,7 +10,11 @@ The form can be seen and used locally by running: `python run.py` inside the mai
 Run the script as indicated before, a webpage should automatically open in your browser. If it does not open, go to "http://127.0.0.1:5005/create_metadata/" on a web browser.
 NB: The code has been developed and tested under a chrome or equivalent browser (e.g. Chromium) - there might be bugs under other browsers.
 
-From the page with the form displayed, in the file selector, choose a folder containing your experiments (the folder should at least contain 1 ".d" Bruker Folder). Import it - it can require two validations in some browsers. Then complete the fields within the form which a relevant to you, and download your .meta file at the bottom of the form.
+From the page with the form displayed, in the file selector, choose a folder containing your experiments (the folder should at least contain 1 ".d" Bruker Folder). Import it - it can require two validations in some browsers. Select the desired experiments among those present in the imported folder. Then complete the fields within the form which a relevant to you, and download your .meta file at the bottom of the form.
+
+Here is a screenshot of what the program should look like:
+
+![alt text](MetadataForm.png)
 
 ## OS Compatibility
 
