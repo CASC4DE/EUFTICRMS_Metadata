@@ -14,14 +14,14 @@
         </div>
         <div class="panel-body" style="display: none;">
           <div id="markdown">
-<textarea id="text" style="visibility: hidden;">
+<textarea id="md_text" style="visibility: hidden;">
 # How to use this metadata generation form?
 *by CASC4DE for EU-FTICR-MS  - Version 1.0.0*
 
 - Import a project folder containing a Bruker .d folder and optionnally a .meta file previously generated. For more information about the structure of a project folder please see this template: 
 
 <p align="center">
-  <img src="/static/img/ProjectFolderStructure.png">
+  <img src="../static/img/ProjectFolderStructure.png">
 </p>
 
 - Select the experiment for which you want to create or edit the metadata file and validate it with a click on "Select experiment". The name of the chosen experiment will be displayed.
@@ -1463,6 +1463,6 @@ Keep in mind that these information are not only notes for your usage but this w
         $("#2DMSPanel").show();
     });
     });
-document.getElementById('markdown').innerHTML = marked(document.getElementById('text').value); 
+document.getElementById('markdown').innerHTML = marked.parse(document.getElementById('md_text').value); 
 </script>
 {% endblock %}

@@ -77,6 +77,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def index():
     return redirect(url_for('create_metadata'))
 
+def clear(direc):
+    if os.path.exists(direc):
+        print("Clearing directory:",direc)
+        sh.rmtree(direc)
+
 def find_param_file(ExpName):
     """
     Used to find a parameter file within an experiment folder from expname (name of the folder)
@@ -124,9 +129,9 @@ def import_folder():
         l = os.listdir(user_UPLOAD_FOLDER)
         if l != []:
             print("Content of Upload Folder:",l)
-            to_rm = "rm -rf "+str(opj(user_UPLOAD_FOLDER,l[0]))
+            to_rm = str(opj(user_UPLOAD_FOLDER,l[0]))
             print("To RM:",to_rm) 
-            os.system(to_rm) #The folder is emptied before uploading new project folder
+            clear(to_rm) #The folder is emptied before uploading new project folder
         print("Configuration import ...")
         Files = request.files.getlist("file")
         for ff in  Files:
@@ -157,11 +162,6 @@ def select_experiment():
         return redirect(url_for('create_metadata', ExpName=ExpName))
     else:
         return redirect(url_for('create_metadata'))
-
-def clear(direc):
-    if os.path.exists(direc):
-        print("Clearing directory:",direc)
-        sh.rmtree(direc)
 
 def generate_base_dico(param_file):
     """
