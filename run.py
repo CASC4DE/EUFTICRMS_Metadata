@@ -92,7 +92,7 @@ def find_param_file(ExpName):
     print("BaseExpName:",BaseExpName)
     working_dir=os.getcwd()
     print("working dir:",working_dir) 
-    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
+    user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     param_file = None
@@ -121,7 +121,7 @@ def import_folder():
     """
     working_dir=os.getcwd()
     print("working dir:",working_dir) 
-    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder') #This folder is created if not exist
+    user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     if request.method == 'POST':
@@ -272,11 +272,11 @@ def create_metadata(ExpName):
             print('fold_name:',project_dir.split('/')[-1])
             reduced_params['fold_name'] = project_dir.split('/')[-1]
         except:
-            print('NO EXPFOLD TRANSMITTED')
+            print('NO EXPFOLD TRANSMITTED - Wrong format imported')
             reduced_params["fold_name"] = "The format of the imported folder was not correct, please see the documentation above to get a structure example."
             reduced_params["ExpName"] = "No experiment can be loaded, please import a correct folder."
     else:
-        print('NO EXPFOLD TRANSMITTED')
+        print('NO EXPFOLD TRANSMITTED - No folder imported')
         reduced_params["fold_name"] = "No folder imported."
         reduced_params["ExpName"] = "No experiment"
     if request.method == 'POST':
@@ -301,7 +301,7 @@ def create_metadata(ExpName):
         else:
             F = os.listdir(user_UPLOAD_FOLDER)[0]
             print("FileName:",os.path.splitext(F)[0])
-            filename = '{0}_v0.meta'.format(os.path.splitext(F)[0])
+            filename = '{0}_v0.meta'.format(ExpName)
         with open(opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0],filename), 'w') as outfile:  
             json.dump(meta_json, outfile, indent=2)
         return send_from_directory(directory=opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0]), filename=filename, as_attachment=True)
