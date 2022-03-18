@@ -35,12 +35,15 @@ from scipy.constants import e as electron
 from dateutil.parser import parse
 from werkzeug.urls import url_parse
 from pathlib import Path
-
+import flask
 from flask import Flask,flash, render_template, request, redirect, url_for, jsonify, send_file,send_from_directory, session
 from werkzeug.utils import secure_filename
 
 import spike
 from spike.File import Solarix, Apex
+
+flaskversion = [int(i) for i in flask.__version__.split(".")]
+print("Version of Flask Library:", flaskversion)
 
 # Global variables
 Debug = False            # Debug Flask
@@ -66,6 +69,7 @@ def init():
 init()
 
 UPLOAD_FOLDER = opj(TMP,'imports')
+user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -92,7 +96,7 @@ def find_param_file(ExpName):
     print("BaseExpName:",BaseExpName)
     working_dir=os.getcwd()
     print("working dir:",working_dir) 
-    user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
+    #user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     param_file = None
@@ -121,7 +125,7 @@ def import_folder():
     """
     working_dir=os.getcwd()
     print("working dir:",working_dir) 
-    user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
+    #user_UPLOAD_FOLDER = os.path.join(UPLOAD_FOLDER,'Metadata_Upload_Folder') #os.path.join(working_dir,'Metadata_Upload_Folder')
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     if request.method == 'POST':
@@ -147,7 +151,7 @@ def import_folder():
 def select_experiment():
     ExpName=None
     working_dir=os.getcwd()
-    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
+    #user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
     project_dir = os.path.join(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0])
     if request.method == 'POST':
         ExpIndex = request.form['ExpList']
@@ -186,7 +190,9 @@ def generate_base_dico(param_file):
     reduced_params['MetaFileVersion'] = "1.0.0"
     reduced_params['MetaFileCreationDate'] = datetime.now().isoformat()
 
-    reduced_params['FileName'] = str(Path(param_file).parent.parent.parent).split('/')[-1]
+    reduced_params['FileName'] = str(Path(param_file)).split(os.sep)[-3].strip('.d')
+    print("NAME*****",Path(param_file))
+    print("****----****",str(Path(param_file)).split(os.sep))
     reduced_params['SpectrometerType'] = SpectrometerType
     AcquisitionDate = parse(params['CLDATE'])
     reduced_params['AcqDate'] = AcquisitionDate.strftime('%Y-%m-%d')
@@ -246,7 +252,7 @@ def create_metadata(ExpName):
     ExpList = []
     reduced_params={}
     working_dir=os.getcwd()
-    user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
+    #user_UPLOAD_FOLDER = os.path.join(working_dir,'Metadata_Upload_Folder')
     if not os.path.exists(user_UPLOAD_FOLDER):
         os.makedirs(user_UPLOAD_FOLDER)
     if len(os.listdir(user_UPLOAD_FOLDER)) != 0:
@@ -300,11 +306,14 @@ def create_metadata(ExpName):
             filename = '{0}_v{1}.meta'.format(base_filename, str(int(meta_version.strip('v'))+1))
         else:
             F = os.listdir(user_UPLOAD_FOLDER)[0]
-            print("FileName:",os.path.splitext(F)[0])
-            filename = '{0}_v0.meta'.format(ExpName)
+            print("FoldName:",os.path.splitext(F)[0])
+            filename = '{0}_v0.meta'.format(ExpName.strip('.')[:-2])
         with open(opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0],filename), 'w') as outfile:  
             json.dump(meta_json, outfile, indent=2)
-        return send_from_directory(directory=opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0]), filename=filename, as_attachment=True)
+        if flaskversion[0] == 1:
+            return send_from_directory(directory=opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0]), filename=filename, as_attachment=True)
+        elif flaskversion[0] == 2: #change for compatibility with flask v2.0 and higher
+                return send_from_directory(directory=opj(user_UPLOAD_FOLDER,os.listdir(user_UPLOAD_FOLDER)[0]), path=filename, as_attachment=True)
     else:
         return render_template('create_metadata.html', param=reduced_params, ExpList=ExpList)
 
@@ -316,8 +325,13 @@ def shutdown():
     global TMP
     print("Quitting")
     clear(TMP)
+    return redirect(url_for('closing'))
     print("Quitting 2")
     sys.exit()
+
+@app.route('/closing')
+def closing():
+    return render_template('close_tab.html')
 
 def main(startweb=True):
     import threading, webbrowser
