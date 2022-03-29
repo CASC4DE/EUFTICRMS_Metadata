@@ -110,7 +110,7 @@ def find_param_file(ExpName):
         for f in os.listdir(os.path.join(project_dir,F)):
             if f.endswith('.m'):
                 for ff in os.listdir(os.path.join(project_dir,F,f)):
-                    if ff.endswith('.method'):
+                    if ff.startswith('apex') and ff.endswith('.method'):
                         param_file = os.path.join(project_dir,F,f,ff)
                         param_file_type = "brukermethod_file"
     if param_file == None:
@@ -175,14 +175,16 @@ def generate_base_dico(param_file):
     # read all params
     print("*** Param file is:",param_file,"***")
     params = Apex.read_param(str(param_file))
+    print(params)
     # determine file type
     with open(param_file) as f: 
             lines = f.readlines()
-    #print(lines)
+    #print("LINES",lines)
     SpectrometerType = "Apex"
     for l in lines:
         if "solari" in l:
             SpectrometerType = "Solarix"
+            print("SpectrometerType = Solarix")
 
     # build meta data
     reduced_params = {}
@@ -275,8 +277,8 @@ def create_metadata(ExpName):
             print("param_file_type,param_file",param_file_type,param_file)
             reduced_params = generate_reduced_params(param_file,param_file_type,project_dir)
             reduced_params['ExpName'] = ExpName
-            print('fold_name:',project_dir.split('/')[-1])
-            reduced_params['fold_name'] = project_dir.split('/')[-1]
+            print('fold_name:',project_dir.split(os.sep)[-1])
+            reduced_params['fold_name'] = project_dir.split(os.sep)[-1]
         except:
             print('NO EXPFOLD TRANSMITTED - Wrong format imported')
             reduced_params["fold_name"] = "The format of the imported folder was not correct, please see the documentation above to get a structure example."
@@ -298,11 +300,17 @@ def create_metadata(ExpName):
         if 'ExpList' in meta_json:
             del meta_json['ExpList']
         if param_file_type=="meta_file":
-            Fname = param_file.split("/")[-1]
+            print('meta file case!')
+            Fname = param_file.split(os.sep)[-1]
+            print("Fname:",Fname)
             meta_version = Fname.strip('.meta').split("_")[-1]
+            print("meta_version:",meta_version)
             list_base_filename = Fname.strip('.meta').split("_")
+            print("list_base_filename:",list_base_filename)
             list_base_filename = list_base_filename[:-1]
+            print("list_base_filename:",list_base_filename)
             base_filename = "_".join(list_base_filename)
+            print("base_filename:",base_filename)
             filename = '{0}_v{1}.meta'.format(base_filename, str(int(meta_version.strip('v'))+1))
         else:
             F = os.listdir(user_UPLOAD_FOLDER)[0]
