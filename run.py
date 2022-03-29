@@ -110,7 +110,7 @@ def find_param_file(ExpName):
         for f in os.listdir(os.path.join(project_dir,F)):
             if f.endswith('.m'):
                 for ff in os.listdir(os.path.join(project_dir,F,f)):
-                    if ff.startswith('apex') and ff.endswith('.method'):
+                    if ff == "apexAcquisition.method":
                         param_file = os.path.join(project_dir,F,f,ff)
                         param_file_type = "brukermethod_file"
     if param_file == None:
